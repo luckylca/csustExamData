@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线刷题</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义滚动条样式，使其在支持的浏览器中更纤细 */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* 确保 MathJax 渲染的图片不会过大 */
+        .question-body img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <!-- MathJax 配置 -->
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      chtml: {
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+      }
+    };
+    </script>
+    <!-- 更换为 CHTML 渲染引擎以获得更好的文本流效果 -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div id="app" class="max-w-4xl mx-auto p-4 md:p-6">
+
+        <!-- 题目显示区域 -->
+        <div id="quiz-view" class="bg-white rounded-lg shadow-md p-6">
+            <!-- 头部信息 -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800" id="question-header"></h2>
+                <div class="text-sm text-gray-600" id="question-counter"></div>
+            </div>
+
+            <!-- 题目内容 -->
+            <div id="question-body" class="text-gray-700 text-lg leading-relaxed mb-4"></div>
+
+            <!-- 选项或输入区域 -->
+            <div id="answer-area" class="space-y-2"></div>
+
+            <!-- 导航按钮 -->
+            <div class="flex justify-between mt-5">
+                <button id="prev-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">上一题</button>
+                <button id="finish-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">完成练习</button>
+                <button id="next-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">下一题</button>
+            </div>
+        </div>
+
+        <!-- 结果显示区域 -->
+        <div id="result-view" class="hidden bg-white rounded-lg shadow-md p-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">练习完成！</h2>
+            <p id="score-text" class="text-xl text-gray-700 mb-8"></p>
+            <button id="restart-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-colors">重新开始</button>
+        </div>
+
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div id="bottom-navbar" class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-2 border-t border-gray-200">
+        <div id="navbar-container" class="flex items-center space-x-2 overflow-x-auto whitespace-nowrap custom-scrollbar pb-2">
+            <!-- 题号按钮将在这里动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 应用程序主逻辑
+        function mainApp() {
+            // 状态管理
+            const state = {
+                questions: [],
+                userAnswers: [],
+                currentIndex: 0,
+                questionOrder: 'sequential', // 'sequential' or 'random'
+            };
+
+            // 元素获取
+            const quizView = document.getElementById('quiz-view');
+            const resultView = document.getElementById('result-view');
+            const questionHeader = document.getElementById('question-header');
+            const questionCounter = document.getElementById('question-counter');
+            const questionBody = document.getElementById('question-body');
+            const answerArea = document.getElementById('answer-area');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const finishBtn = document.getElementById('finish-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const scoreText = document.getElementById('score-text');
+            const navbarContainer = document.getElementById('navbar-container');
+
+            // 题库数据
+            const questionBankData = [
+              { "question": "一运动质点在某瞬时位于矢径$\\vec{r}$ (x, y)的端点处，则其速度大小为", "options": ["$\\frac{dr}{dt}$", "$\\frac{d\\vec{r}}{dt}$", "$\\frac{d|\\vec{r}|}{dt}$", "$\\sqrt{(\\frac{dx}{dt})^2+(\\frac{dy}{dt})^2}$"], "answer": "D", "category": "力学" },
+              { "question": "下述关于质点运动描述的表达式正确的是", "options": ["$|\\Delta\\vec{r}| = \\Delta r$", "$\\frac{d\\vec{r}}{dt} = \\frac{dr}{dt}$", "$\\left|\\frac{d\\vec{r}}{dt}\\right| \\neq \\left|\\frac{dr}{dt}\\right|$", "$|ds| \\neq |d\\vec{r}|$" ], "answer": "C", "category": "力学" },
+              { "question": "某质点作直线运动的运动学方程为$x = 3t - 5t^3 + 2$，则该质点作", "options": ["匀加速直线运动，加速度沿 x 轴正方向", "匀加速直线运动，加速度沿 x 轴负方向", "变加速直线运动，加速度沿 x 轴正方向", "变加速直线运动，加速度沿 x 轴负方向"], "answer": "D", "category": "力学" },
+              { "question": "一质点沿 x 轴运动，其加速度 a 与位置坐标 x 的关系为 $a = 2 + 6x^2$。如果质点在原点处的速度为零，则质点在ｘ＝2ｍ处的速度大小 v 约为", "options": ["$\\sqrt{40}$ m/s", "5m/s", "$\\sqrt{20}$ m/s", "10m/s"], "answer": "A", "category": "力学" },
+              { "question": "下列说法中，哪一个是正确的？", "options": ["一质点在某时刻的瞬时速度是 2 m/s，说明它在此后 1 s 内一定要经过 2 m 的路程", "斜向上抛的物体，在最高点处的速度最小，加速度最大", "物体作曲线运动时，有可能在某时刻的法向加速度为零", "物体加速度越大，则速度越大"], "answer": "C", "category": "力学" },
+              { "question": "质点作半径为 R 的变速圆周运动时的加速度大小为（v 表示任一时刻质点的速率）", "options": ["$\\frac{dv}{dt}$", "$v^2/R$", "$\\frac{dv}{dt} + \\frac{v^2}{R}$", "$[(\\frac{dv}{dt})^2 + (\\frac{v^4}{R^2})]^{1/2}$"], "answer": "D", "category": "力学" },
+              { "question": "在一个转动的齿轮上，一个齿尖 P 沿半径为 R=0.2m 的圆周运动，其路程 S 随时间的变化规律为 $S = v_0 t + \\frac{1}{2}bt^2$，其中 $v_0=2m/s$ 和 $b=0.3m/s^2$。则 t=5s 时齿尖 P 的总加速度大小 a 约等于", "options": ["34m/s$^2$", "42m/s$^2$", "51m/s$^2$", "61m/s$^2$"], "answer": "D", "category": "力学" },
+              { "question": "质点的质量为 $m$，置于光滑球面的顶点 A 处（球面固定不动），如图所示。当它由静止开始下滑到球面上 B 点时，它的加速度的大小为", "options": ["$a=2g(1-\\cos\\theta)$", "$a = g\\sin\\theta$", "a=g", "$a=\\sqrt{4g^2(1-\\cos\\theta)^2+g^2\\sin^2\\theta}$"], "answer": "D", "category": "力学" },
+              { "question": "一质点从静止出发沿半径为 R=3m 的圆周运动，切向加速度恒为 $a_\\tau = 8m/s^2$，经时间 t 总加速度恰好与半径成$\\pi/4$角，则 t 等于", "options": ["$\\frac{\\sqrt{6}}{4}$", "$\\frac{\\sqrt{6}}{2}$", "$\\frac{\\sqrt{3}}{2}$", "$\\frac{\\sqrt{2}}{3}$"], "answer": "A", "category": "力学" },
+              { "question": "在足够长的管中装有粘滞液体，放入钢球由静止开始向下运动，下列说法中正确的是：", "options": ["钢球运动越来越慢，最后静止不动", "钢球运动越来越慢，最后达到稳定的速度", "钢球运动越来越快，一直无限制地增加", "钢球运动越来越快，最后达到稳定的速度"], "answer": "D", "category": "力学" },
+              { "question": "质量分别为m 和 M 的滑块 A和 B ，叠放在光滑水平桌面上，如图所示。 A、 B 间静摩擦系数为 $\\mu_s$， 滑动摩擦系数为 $\\mu_k$ ，系统原处于静止。今有一水平力作用于 A上，要使 A、 B 不发生相对滑动，则应有", "options": ["$F \\le \\mu_s mg$", "$F \\le \\mu_s(1+m/M)mg$", "$F \\le \\mu_s(m+M)g$", "$F \\le \\mu_s mg \\frac{m}{M}$"], "answer": "B", "category": "力学" },
+              { "question": "质量为 m 的物体最初位于 $x_0$处，在力 $F=-k/x^2$ 作用下由静止开始沿直线运动，k为一常数，则物体在任一位置 x 处的速度应为", "options": ["$\\sqrt{\\frac{k}{m}(\\frac{1}{x}-\\frac{1}{x 0})}$", "$\\sqrt{\\frac{2k}{m}(\\frac{1}{x}-\\frac{1}{x 0})}$", "$\\sqrt{\\frac{3k}{m}(\\frac{1}{x}-\\frac{1}{x 0})}$", "$\\sqrt{\\frac{4k}{m}(\\frac{1}{x}-\\frac{1}{x 0})}$"], "answer": "B", "category": "力学" },
+              { "question": "质量为 20 g 的子弹沿 X 轴正向以 500 m/s 的速率射入一木块后，与木块一起仍沿X轴正向以 50 m/s 的速率前进，在此过程中木块所受冲量的大小为", "options": ["10N·s", "-10N·s", "9N·s", "-9N·s"], "answer": "C", "category": "力学" },
+              { "question": "如图所示，流水以初速度 $v_1$ 进入弯管，流出时的速度为$v_2$ ，且 $v_1=v_2=5.0$ m/s,设每秒流入的水质量为 $q=10$ kg/s，则在管子转弯处， 水对管壁的平均冲力 F 大小为", "options": ["50 N", "100 N", "150 N", "200 N"], "answer": "A", "category": "力学" },
+              { "question": "设作用在质量为 m＝2.00kg 的物体上的力 F=6.00t+3.00（SI）。如果物体在这一力的作用下， 由静止开始沿直线运动，在 0 到 1.50s 的时间间隔内，这个力作用在物体上的冲量大小 I=", "options": ["11Ns", "18Ns", "36Ns", "60Ns"], "answer": "A", "category": "力学" },
+              { "question": "作匀速圆周运动的物体运动一周后回到原处，这一周期内物体", "options": ["动量守恒，合外力为零", "动量守恒，合外力不为零", "动量变化为零，合外力不为零， 合外力的冲量为零", "动量变化为零，合外力为零"], "answer": "C", "category": "力学" },
+              { "question": "用一根细线吊一重物，重物质量为 5 kg，重物下面再系一根同样的细线，细线只能经受 70 N 的拉力.现在突然向下拉一下下面的线.设力最大值为 50 N，则", "options": ["下面的线先断", "上面的线先断", "两根线一起断", "两根线都不断"], "answer": "D", "category": "力学" },
+              { "question": "对于一个物体系来说，在下列的哪种情况下系统的机械能守恒？", "options": ["合外力为 0", "合外力不作功", "外力和非保守内力都不作功", "外力和保守内力都不作功"], "answer": "C", "category": "力学" },
+              { "question": "作为相互作用的一对滑动摩擦力，当分别作用在有相对滑动的两物体上时，它们作功之和", "options": ["恒为零", "恒为负", "恒为正", "可能为正、为负或为零"], "answer": "B", "category": "力学" },
+              { "question": "如图的系统，物体 A，B 置于光滑的桌面上，物体 A 和 C，B 和 D 之间摩擦因数均不为零，首先用外力沿水平方向相向推压 A 和 B，使弹簧压缩，后拆除外力，则 A 和 B 弹开过程中，对 A、B、C、D 组成的系统", "options": ["动量守恒，机械能守恒", "动量不守恒，机械能守恒", "动量不守恒，机械能不守恒", "动量守恒，机械能不一定守恒"], "answer": "D", "category": "力学" },
+              { "question": "质点在恒力 $\\vec{F} = -3\\vec{i} - 5\\vec{j} + 9\\vec{k}$ （N）作用下，从 $\\vec{r_1} = 2\\vec{i} + 4\\vec{j} + 3\\vec{k}$ （m）运动到 $\\vec{r_2} = 6\\vec{i} - \\vec{j} + 12\\vec{k}$ （m）处，则在此过程中该力做的功为", "options": ["67J", "-67J", "94J", "17J"], "answer": "C", "category": "力学" },
+              { "question": "几个力同时作用在一个具有光滑固定转轴的刚体上，如果这几个力的矢量和为零，则此刚体", "options": ["必然不会转动", "转速必然不变", "转速必然改变", "转速可能不变，也可能改变"], "answer": "D", "category": "力学" },
+              { "question": "如图所示，A、B 为两个相同的绕着轻绳的定滑轮。A 滑轮挂一质量为 M 的物体，B 滑轮受拉力 F，而且 F=Mg。设 A、B 两滑轮的角加速度分别为 $\\beta_A$和 $\\beta_B$不计滑轮轴的摩擦，则有", "options": ["$\\beta_A=\\beta_B$", "$\\beta_A>\\beta_B$", "$\\beta_A<\\beta_B$", "开始时 $\\beta_A=\\beta_B$，以后 $\\beta_A<\\beta_B$"], "answer": "C", "category": "力学" },
+              { "question": "一绕中心轴转动的圆盘，角速度为 $\\omega$, 若将它放在摩擦系数为 $\\mu$ 水平桌面上，问经过多长时间停下来？（已知圆盘质量为 m 半径为 R，绕轴的转动惯量为 $J=\\frac{1}{2}mR^2$）", "options": ["$\\frac{3R}{4\\mu g}$", "$\\frac{5R}{4\\mu g}$", "$\\frac{3\\omega}{4R\\mu g}$", "$\\frac{3R\\omega}{4\\mu g}$"], "answer": "D", "category": "力学" },
+              { "question": "一水平圆盘可绕通过其中心的固定竖直轴转动，盘上站着一个人。把人和圆盘取作系统，当此人在盘上随意走动时，若忽略轴的摩擦，此系统", "options": ["动量守恒", "机械能守恒", "对转轴的角动量守恒", "动量、机械能和角动量都守恒"], "answer": "C", "category": "力学" },
+              { "question": "如图所示，一匀质细杆可绕通过上端与杆垂直的水平光滑固定轴O旋转，初始状态为静止悬挂。现有一个小球自左方水平打击细杆。 设小球与细杆之间为非弹性碰撞，则在碰撞过程中对细杆与小球这一系统", "options": ["只有机械能守恒", "只有动量守恒", "只有对转轴 O 的角动量守恒", "机械能、动量和角动量均守恒"], "answer": "C", "category": "力学" },
+              { "question": "一个半径为 R=20.0cm，质量为 m 的均匀薄圆盘，竖直地立放在粗糙的水平桌面上。开始时处于静止状态，而后薄圆盘受到轻微扰动而绕过接触点的某一轴转动最终倒下，已知圆盘对该轴的转动惯量为 $5mR^2/4$。则圆盘平面与桌面碰撞前（即圆盘平面在水平位置）时质心速度的大小为 $v_c$=（两位有效数字，重力加速度 $g=9.80m/s^2$）。", "options": ["1.3m/s", "1.8m/s", "2.2m/s", "2.5m/s"], "answer": "B", "category": "力学" },
+              { "question": "一人站在轴上无摩擦的旋转平台上，平台以 $\\omega_1=2\\pi rad/s$ 的角速度旋转，这时他的双臂水平伸直，并且两手都握着重物，整个系统的转动惯量是 $J_1=6.00kg·m^2$。如果他将双手收回，系统的转动惯量减小到 $J_2=2.00kg·m^2$，则系统的转动动能增量为", "options": ["237J", "400J", "20J", "135J"], "answer": "A", "category": "力学" },
+              { "question": "一根长为l、质量为 M 的匀质棒自由悬挂于通过其上端的光滑水平轴上。现有一质量为 m 的子弹以水平速度 $v_0$射向棒的中心，并以 $v_0/2$ 的水平速度穿出棒，此后棒的最大偏转角恰为$90^\\circ$，则 $v_0$的大小为", "options": ["$\\frac{4M}{m}\\sqrt{\\frac{gl}{3}}$", "$\\sqrt{\\frac{gl}{2}}$", "$\\frac{2M}{m}\\sqrt{gl}$", "$\\frac{16M^2}{3m^2}gl$"], "answer": "A", "category": "力学" },
+              { "question": "在双缝干涉实验中，若单色光源 S 到两缝 S1、S2距离相等，则观察屏上中央明纹位于图中 O 处。现将光源 S 向下移动到示意图中的 S’位置，则", "options": ["中央明条纹也向下移动，且条纹间距不变", "中央明条纹向上移动，且条纹间距不变", "中央明条纹向下移动，且条纹间距增大", "中央明条纹向上移动，且条纹间距增大"], "answer": "B", "category": "波动光学" },
+              { "question": "用白光光源进行双缝实验，若用一个纯红色的滤光片遮盖一条缝，用一个纯蓝色的滤光片遮盖另一条缝，则", "options": ["干涉条纹的宽度将发生改变", "产生红光和蓝光的两套彩色干涉条纹", "干涉条纹的亮度将发生改变", "不产生干涉条纹"], "answer": "D", "category": "波动光学" },
+              { "question": "在双缝干涉实验中，两缝间距离为 d，双缝与屏幕之间的距离为 D（D>>d）。波长为 $\\lambda$ 的平行单色光垂直照射到双缝上。屏幕上干涉条纹中相邻暗纹之间的距离是", "options": ["$2\\lambda D / d$", "$\\lambda d / D$", "$dD / \\lambda$", "$\\lambda D / d$"], "answer": "D", "category": "波动光学" },
+              { "question": "如图所示，折射率为 $n_2$、厚度为 e 的透明介质薄膜的上方和下方的透明介质的折射率分别为 $n_1$ 和 $n_3$，已知 $n_1 < n_2 < n_3$。若用波长为$\\lambda$ 的单色平行光垂直入射到该薄膜上，则从薄膜上、下两表面反射的光束① 与② 的光程差是", "options": ["$2n_2 e$", "$2n_2 e - \\lambda / 2$", "$2n_2 e - \\lambda$", "$2n_2 e - \\lambda / (2n_2)$"], "answer": "A", "category": "波动光学" },
+              { "question": "一束波长为$\\lambda$ 的单色光由空气垂直入射到折射率为 n 的透明薄膜上，透明薄膜放在空气中，要使反射光得到干涉加强，则薄膜最小的厚度为", "options": ["$\\lambda / 4$", "$\\lambda / (4n)$", "$\\lambda / 2$", "$\\lambda / (2n)$"], "answer": "B", "category": "波动光学" },
+              { "question": "在图示三种透明材料构成的牛顿环装置中，用单色光垂直照射，在反射光中看到干涉条纹，则在接触点 P 处形成的圆斑为 (图中数字为折射率)", "options": ["全明", "全暗", "右半部明，左半部暗", "右半部暗，左半部明"], "answer": "D", "category": "波动光学" },
+              { "question": "如图 a 所示，一光学平板玻璃 A 与待测工件 B 之间形成空气劈尖，用波长 $\\lambda = 500nm(1nm=10^{-9}m)$ 的单色光垂直照射。看到的反射光的干涉条纹如图 b 所示。有些条纹弯曲部分的顶点恰好与其右边条纹的直线部分的连续相切。则工件的上表面缺陷是", "options": ["不平处为凸起纹，最大高度为 500nm", "不平处为凸起纹，最大高度为 250nm", "不平处为凹槽，最大深度为 500nm", "不平处为凹槽，最大深度为 250nm"], "answer": "B", "category": "波动光学" },
+              { "question": "在如图所示的单缝夫琅禾费衍射装置中，设中央明纹的衍射角范围很小，若使单缝宽度 a 变为原来的$\\frac{3}{2}$，同时使入射的单色光的波长$\\lambda$ 变成原来的$\\frac{3}{4}$，则屏幕 C 上单缝衍射条纹中央明纹的宽度$\\Delta x$ 将变为原来的", "options": ["3/4 倍", "2/3 倍", "9/8 倍", "1/2 倍"], "answer": "D", "category": "波动光学" },
+              { "question": "一束波长为 $\\lambda$ 的平行单色光垂直入射到一个单缝 AB 上，装置如图。在屏幕 D 上形成衍射图样，如果 P 是中央条纹一侧第一个暗纹所在的位置，则BC 的长度为", "options": ["$\\lambda / 2$", "$\\lambda$", "$3\\lambda / 2$", "$2\\lambda$"], "answer": "B", "category": "波动光学" },
+              { "question": "如果单缝夫琅禾费衍射的第一级暗纹发生在衍射角为$\\phi = 30^\\circ$的方位上。所用单色光波长为$\\lambda = 500nm$，则单缝宽度为", "options": ["$2.5×10^{-5}$m", "$1.0×10^{-5}$m", "$1.0×10^{-6}$m", "$2.5×10^{-7}$m"], "answer": "C", "category": "波动光学" },
+              { "question": "一束白光垂直照射在一光栅上，在形成的同一级光栅光谱中，偏离中央明纹最远的是", "options": ["紫光", "绿光", "黄光", "红光"], "answer": "D", "category": "波动光学" },
+              { "question": "若用衍射光栅准确测定一单色可见的波长，在下列各种光栅常数的光栅中选用哪一种最好？", "options": ["$5.0×10^{-1}$mm", "$1.0×10^{-1}$mm", "$1.0×10^{-2}$mm", "$1.0×10^{-3}$mm"], "answer": "D", "category": "波动光学" },
+              { "question": "对某一定波长的垂直入射光，衍射光栅的屏幕上只能出现零级和一级主极大，欲使屏幕上出现更高级次的主极大，应该", "options": ["换一个光栅常数较小的光栅", "换一个光栅常数较大的光栅", "将光栅向靠近屏幕的方向移动", "将光栅向远离屏幕的方向移动"], "answer": "B", "category": "波动光学" },
+              { "question": "在光栅光谱中，假如所有偶数级次的主极大都恰好在单缝衍射的暗纹方向上，因而实际上不出现，那么此光栅每个透光缝宽度 a 和相邻两缝间不透光部分宽度 b 的关系为", "options": ["$a = \\frac{1}{2}b$", "a = b", "a = 2b", "a = 3b"], "answer": "B", "category": "波动光学" },
+              { "question": "一束光是自然光和线偏振光的混合光，让它垂直通过一偏振片。若以此入射光束为轴旋转偏振片，测得透射光强度最大值是最小值的 5 倍，那么入射光束中自然光与线偏振光的光强比值为", "options": ["1/2", "1/3", "1/4", "1/5"], "answer": "A", "category": "波动光学" },
+              { "question": "在双缝干涉实验中，用单色自然光，在屏上形成干涉条纹。若在两缝后放一个偏振片，则", "options": ["干涉条纹的间距不变，但明纹的亮度加强", "干涉条纹的间距不变，但明纹的亮度减弱", "干涉条纹的间距变窄，且明纹的亮度减弱", "无干涉条纹"], "answer": "B", "category": "波动光学" },
+              { "question": "一束光强为 $I_0$ 的自然光，相继通过三个偏振片 $P_1$、$P_2$、$P_3$后，出射光的光强为 $I=3I_0/32$。已知 $P_1$ 和 $P_3$的偏振化方向相互垂直，若以入射光线为轴，旋转 $P_2$，要使出射光的光强为零，$P_2$最少要转过的角度是", "options": ["60°", "30°", "90°", "45°"], "answer": "B", "category": "波动光学" },
+              { "question": "某种透明媒质对于空气的临界角（指全反射）等于 45°，光从空气射向此媒质时的布儒斯特角是", "options": ["54.7°", "45°", "40.9°", "35.3°"], "answer": "A", "category": "波动光学" },
+              { "question": "某质点作直线运动的运动学方程为$x = 3t - 5t^3 + 6$（SI），则该质点作", "options": ["匀加速直线运动，加速度沿 x 轴正方向", "匀加速直线运动，加速度沿 x 轴负方向", "变加速直线运动，加速度沿 x 轴正方向", "变加速直线运动，加速度沿 x 轴负方向"], "answer": "D", "category": "力学" },
+              { "question": "某物体的运动规律为$\\frac{dv}{dt} = -kv^2t$，式中的k 为大于零的常量。当$t = 0$时，初速为$v_0$，则速度$v$ 与时间$t$的函数关系是", "options": ["$v = \\frac{1}{2}kt^2 + v_0$", "$v= -\\frac{1}{2}kt^2 + v_0$", "$\\frac{1}{v} = \\frac{1}{2}kt^2 + \\frac{1}{v_0}$", "$\\frac{1}{v} = -\\frac{1}{2}kt^2 + \\frac{1}{v_0}$"], "answer": "C", "category": "力学" },
+              { "question": "一质点沿 x方向运动，其加速度随时间变化关系为$a = 3+2t$（SI）， 如果初始时质点的速度$v_0$为$5m/s$ ， 则在$t = 4s$时刻质点的速度$v$ =", "options": ["15m/s", "23m/s", "33m/s", "45m/s"], "answer": "C", "category": "力学" },
+              { "question": "一质点在平面上作一般曲线运动，其瞬时速度为$\\vec{v}$，瞬时速率为$v$ ，某一时间内的平均速度为$\\bar{\\vec{v}}$ ，平均速率为$\\bar{v}$ ，它们之间的关系必定有：", "options": ["$|\\vec{v}|=v$, $|\\bar{\\vec{v}}|=\\bar{v}$", "$|\\vec{v}| \\neq v$, $|\\bar{\\vec{v}}|=\\bar{v}$", "$|\\vec{v}| \\neq v$, $|\\bar{\\vec{v}}| \\neq \\bar{v}$", "$|\\vec{v}|=v$, $|\\bar{\\vec{v}}| \\neq \\bar{v}$"], "answer": "D", "category": "力学" },
+              { "question": "质量为 $0.10 kg$ 的质点，由静止开始沿曲线 $\\vec{r} = \\frac{5}{3}t^3 \\vec{i} + 2 \\vec{j}$ （SI） 运动， 则在$t = 0$到$t = 2s$时间内，作用在该质点上的合外力所做的功为", "options": ["$\\frac{5}{4}$J", "20J", "$\\frac{75}{4}$J", "40J"], "answer": "B", "category": "力学" },
+              { "question": "如图所示，子弹射入放在水平光滑地面上静止的木块而不穿出．以地面为参考系，下列说法中正确的说法是", "options": ["子弹的动能转变为木块的动能", "子弹─木块系统的机械能守恒", "子弹动能的减少等于子弹克服木块阻力所作的功", "子弹克服木块阻力所作的功等于这一过程中产生的热"], "answer": "C", "category": "力学" },
+              { "question": "一质量为$m$ 的滑块，由静止开始沿着 1/4 圆弧形光滑的木槽滑下。设木槽的质量也是$m$ 。槽的圆半径为 $R$ ，放在光滑水平地面上， 如图所示。则滑块离开槽时的速度是", "options": ["$\\sqrt{2Rg}$", "$2\\sqrt{Rg}$", "$\\sqrt{Rg}$", "$\\frac{1}{2}\\sqrt{Rg}$"], "answer": "C", "category": "力学" },
+              { "question": "一均匀细杆原来静止放在光滑的水平面上，现在其一端给予一垂直于杆身的水平方向的打击，此后杆的运动情况是：", "options": ["杆沿力的方向平动", "杆绕其未受打击的端点转动", "杆的质心沿打击力的方向运动，杆又绕质心转动", "杆的质心不动，而杆绕质心转动"], "answer": "C", "category": "力学" },
+              { "question": "如图所示，一个小物体，位于光滑的水平桌面上，与一绳的一端相连结，绳的另一端穿过桌面中心的小孔 O. 该物体原以角速度$\\omega$ 在半径为 $R$ 的圆周上绕 O 旋转，今将绳从小孔缓慢往下拉．则物体", "options": ["动能不变，动量改变", "动量不变，动能改变", "角动量不变，动量不变", "角动量改变，动量改变", "角动量不变，动能、动量都改变"], "answer": "E", "category": "力学" },
+              { "question": "人造地球卫星，绕地球作椭圆轨道运动，地球在椭圆的一个焦点上，则卫星的", "options": ["动量不守恒，动能守恒", "动量守恒，动能不守恒", "对地心的角动量守恒，动能不守恒", "对地心的角动量不守恒，动能守恒"], "answer": "C", "category": "力学" },
+              { "question": "一圆盘绕过盘心且与盘面垂直的光滑固定轴 O 以角速度$\\omega$ 按图示方向转动.若如图所示的情况那样，将两个大小相等方向相反但不在同一条直线的力 F 沿盘面同时作用到圆盘上，则圆盘的角速度", "options": ["必然增大", "必然减少", "不会改变", "如何变化，不能确定"], "answer": "A", "category": "力学" },
+              { "question": "均匀细棒 OA 可绕通过其一端 O 而与棒垂直的水平固定光滑轴转动，如图所示．今使棒从水平位置由静止开始自由下落，在棒摆动到竖直位置的过程中，下述说法哪一种是正确的？", "options": ["角速度从小到大，角加速度从大到小", "角速度从小到大，角加速度从小到大", "角速度从大到小，角加速度从大到小", "角速度从大到小，角加速度从小到大"], "answer": "A", "category": "力学" },
+              { "question": "图（a）为一绳长为$l$ 、质量为$m$ 的单摆。图（b）为一长度为$l$、质量$m$ 为能绕水平固定轴 O 自由转动的匀质细棒。现将单摆和细棒同时从与竖直线成$\\theta$ 角度的位置由静止释放。若运动到竖直位置时，单摆、细棒角速度分别以$\\omega_1$、$\\omega_2$ 表示。则：", "options": ["$\\omega_1=2\\omega_2$", "$\\omega_1=\\omega_2$", "$\\omega_1 = \\frac{2}{3}\\omega_2$", "$\\omega_1 = \\sqrt{\\frac{2}{3}}\\omega_2$"], "answer": "D", "category": "力学" },
+              { "question": "一轻绳跨过一具有水平光滑轴、质量为$M$的定滑轮，绳的两端分别悬有质量为$m_1$和$m_2$ 的物体（$m_1 < m_2$），如图所示。 绳与轮之间无相对滑动。若某时刻滑轮沿逆时针方向转动，则绳中的张力", "options": ["处处相等", "左边大于右边", "右边大于左边", "哪边大无法判断"], "answer": "C", "category": "力学" },
+              { "question": "一自由悬挂的匀质细棒 AB，可绕 A 端在竖直平面内自由转动，现给 B 端一初速$v_0$，则棒在向上转动过程中仅就大小而言", "options": ["角速度不断减小，角加速度不断减少", "角速度不断减小，角加速度不断增加", "角速度不断减小，角加速度不变", "所受力矩越来越大，角速度也越来越大"], "answer": "B", "category": "力学" },
+              { "question": "一长为$l$，质量为 $m$ 的匀质细棒，绕一端作匀速转动，其中心处的速率为 v，则细棒的转动动能为", "options": ["$mv^2/2$", "$2mv^2/3$", "$mv^2/6$", "$mv^2/24$"], "answer": "B", "category": "力学" },
+              { "question": "光滑的水平桌面上，有一长为 2L、质量为m 的匀质细杆，可绕过其中点且垂直于杆的竖直光滑固定轴 O 自由转动，其转动惯量为$\\frac{1}{3}mL^2$，起初杆静止．桌面上有两个质量均为$m$ 的小球，各自在垂直于杆的方向上，正对着杆的一端，以相同速率$v$ 相向运动，如图所示．当两小球同时与杆的两个端点发生完全非弹性碰撞后，就与杆粘在一起转动，则这一系统碰撞后的转动角速度应为", "options": ["$\\frac{2v}{3L}$", "$\\frac{4v}{5L}$", "$\\frac{6v}{7L}$", "$\\frac{8v}{9L}$"], "answer": "C", "category": "力学" },
+              { "question": "如图所示，波长为$\\lambda$ 的平行单色光垂直入射在折射率为 $n_2$的薄膜上，经上下两个表面反射的两束光发生干涉。若薄膜厚度为 e，而且 $n_1 > n_2 > n_3$，则两束反射光在相遇点的相位差为", "options": ["$4\\pi n_2 e / \\lambda$", "$2\\pi n_2 e / \\lambda$", "$(4\\pi n_2 e / \\lambda) + \\pi$", "$(2\\pi n_2 e / \\lambda) - \\pi$"], "answer": "A", "category": "波动光学" },
+              { "question": "在双缝干涉实验中，设缝是水平的。若双缝所在的平板稍微向上平移，其它条件不变，则屏上的干涉条纹", "options": ["向下平移，且间距不变", "向上平移，且间距不变", "不移动，但间距改变", "向上平移，且间距改变"], "answer": "B", "category": "波动光学" },
+              { "question": "把一平凸透镜放在平玻璃上，构成牛顿环装置。当平凸透镜慢慢地向上平移时，由反射光形成的牛顿环", "options": ["向中心收缩，条纹间隔变小", "向中心收缩，环心呈明暗交替变化", "向外扩张，环心呈明暗交替变化", "向外扩张，条纹间隔变大"], "answer": "B", "category": "波动光学" },
+              { "question": "自然光以 60°的入射角照射到某两介质交界面时，反射光为完全线偏振光，则知折射光为", "options": ["完全线偏振光且折射角是 30°", "部分偏振光且只是在该光由真空入射到折射率为$\\sqrt{3}$ 的介质时，折射角是 30°", "部分偏振光，但须知两种介质的折射率才能确定折射角", "部分偏振光且折射角是 30°"], "answer": "D", "category": "波动光学" },
+              { "question": "一束自然光自空气射向一块平板玻璃（如图），设入射角等于布儒斯特角 $i_0$，则在界面 2 的反射光", "options": ["是自然光", "是线偏振光且光矢量的振动方向垂直于入射面", "是线偏辰光且光矢量的振动方向平行于入射面", "是部分偏振光"], "answer": "B", "category": "波动光学" },
+              { "question": "在如图所示的单缝夫琅禾费衍射实验中，若将单缝沿透镜光轴方向向透镜平移，则屏幕上的衍射条纹", "options": ["间距变大", "间距变小", "不发生变化", "间距不变，但明暗条纹的位置交替变化"], "answer": "C", "category": "波动光学" },
+              { "question": "两块平玻璃构成空气劈形膜，左边为棱边，用单色平行光垂直入射。若上面的平玻璃以棱边为轴，沿逆时针方向作微小转动，则干涉条纹的", "options": ["间隔变小，并向棱边方向平移", "间隔变大，并向远离棱边方向平移", "间隔不变，向棱边方向平移", "间隔变小，并向远离棱边方向平移"], "answer": "A", "category": "波动光学" },
+              { "question": "如图，S1、S2是两个相干光源，它们到 P 点的距离分别为 $r_1$和 $r_2$。路径 S1P 垂直穿过一块厚度为 $t_1$，折射率为 $n_1$的介质板，路径 S2P 垂直穿过厚度为 $t_2$，折射率为 $n_2$ 的另一介质板，其余部分可看作真空，这两条路径的光程差等于", "options": ["$(r_2 + n_2 t_2) - (r_1 + n_1 t_1)$", "$(r_2 + (n_2 - 1)t_2) - (r_1 + (n_1 - 1)t_2)$", "$(r_2 - n_2 t_2) - (r_1 - n_1 t_1)$", "$n_2 t_2 - n_1 t_1$"], "answer": "B", "category": "波动光学" },
+              { "question": "波长为$\\lambda$ 的单色光垂直入射于光栅常数为 $d$、缝宽为 $a$、总缝数为 $N$ 的光栅上。取 $k=0, \\pm1, \\pm2, \\ldots$，则决定出现主极大的衍射角 $\\theta$ 的公式可写成", "options": ["$Na\\sin\\theta=k\\lambda$", "$a\\sin\\theta=k\\lambda$", "$Nd\\sin\\theta=k\\lambda$", "$d\\sin\\theta=k\\lambda$"], "answer": "D", "category": "波动光学" },
+              { "question": "两偏振片堆叠在一起，一束自然光垂直入射其上时没有光线通过。当其中一偏振片慢慢转动 180°时透射光强度发生的变化为：", "options": ["光强单调增加", "光强先增加，然后减小，再增加，再减小至零", "光强先增加，后减小，再增加", "光强先增加，后又减小至零"], "answer": "D", "category": "波动光学" },
+              { "question": "在如图所示的单缝的夫琅禾费衍射实验中，将单缝 K 沿垂直于光的入射方向（沿图中的 x 方向）稍微平移，则", "options": ["衍射条纹移动，条纹宽度不变", "衍射条纹移动，条纹宽度变动", "衍射条纹中心不动，条纹变宽", "衍射条纹不动，条纹宽度不变"], "answer": "D", "category": "波动光学" },
+              { "question": "波长 $\\lambda=500nm(1nm=10^{-9}m)$ 的单色垂直照射到宽度 a=0.25mm 的单缝上，单缝后面放置一凸透镜，在凸透镜的焦平面上放置一屏幕，用以观测衍射条纹。今测得屏幕上中央明条纹一侧第三个暗条纹和另一侧第三个暗条纹之间的距离为 d=12mm，则凸透镜的焦距 f 为", "options": ["2m", "1m", "0.5m", "0.2m"], "answer": "B", "category": "波动光学" },
+              { "question": "测量单色光的波长时，下列方法中哪一种方法最为准确？", "options": ["双缝干涉", "牛顿环", "单缝衍射", "光栅衍射"], "answer": "D", "category": "波动光学" },
+              { "question": "在双缝干涉实验中，两条缝的宽度原来是相等的。若其中一缝的宽度略变窄（缝中心位置不变），则", "options": ["干涉条纹的间距变宽", "干涉条纹的间距变窄", "干涉条纹的间距不变，但原极小处的强度不再为零", "不再发生干涉现象"], "answer": "C", "category": "波动光学" }
+            ];
+
+            // 初始化函数
+            function init() {
+                // 用户选择的是顺序模式
+                state.questionOrder = 'sequential'; 
+                
+                // 解析JSON数据并清理
+                const cleanedQuestions = questionBankData.map(q => {
+                    const cleanedOptions = q.options.map(opt => {
+                        // 移除 (A) (B) 等前缀和末尾的 ； 。
+                        return opt.replace(/^[（(][A-Z][)）]\s*/, '').trim().replace(/[；。]$/, '').trim();
+                    });
+                    const cleanedQuestion = q.question.replace(/\s*（\s*）\s*$/, '').trim();
+                    
+                    // 自动检测题目类型
+                    const type = (cleanedOptions && cleanedOptions.length > 0) ? 'multipleChoice' : 'fillInTheBlank';
+                    
+                    return { ...q, question: cleanedQuestion, options: cleanedOptions, type };
+                });
+
+                state.questions = cleanedQuestions;
+                state.userAnswers = new Array(state.questions.length).fill(null);
+
+                // 渲染第一个问题和导航栏
+                renderQuestion();
+                renderNavbar();
+                
+                // 添加事件监听
+                prevBtn.addEventListener('click', showPrev);
+                nextBtn.addEventListener('click', showNext);
+                finishBtn.addEventListener('click', showResults);
+                restartBtn.addEventListener('click', restartQuiz);
+            }
+
+            // 渲染当前问题
+            function renderQuestion() {
+                // 如果没有题目，则不进行渲染
+                if (state.questions.length === 0) {
+                    questionBody.innerHTML = '<p>题库加载失败或为空。</p>';
+                    return;
+                }
+
+                const question = state.questions[state.currentIndex];
+                questionHeader.textContent = question.category || '综合';
+                questionCounter.textContent = `第 ${state.currentIndex + 1} / ${state.questions.length} 题`;
+                questionBody.innerHTML = question.question;
+
+                answerArea.innerHTML = ''; // 清空之前的答案区域
+
+                // 根据题目类型渲染不同UI
+                if (question.type === 'multipleChoice') {
+                    renderMultipleChoice(question);
+                } else { // fillInTheBlank
+                    renderFillInTheBlank(question);
+                }
+
+                // 更新导航按钮状态
+                prevBtn.disabled = state.currentIndex === 0;
+                nextBtn.disabled = state.currentIndex === state.questions.length - 1;
+                
+                // 强制MathJax重新渲染
+                if (window.MathJax) {
+                    MathJax.typesetPromise([questionBody, answerArea]);
+                }
+            }
+
+            // 渲染选择题
+            function renderMultipleChoice(question) {
+                const optionLetters = ['A', 'B', 'C', 'D', 'E'];
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'w-full text-left p-3 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400';
+                    button.innerHTML = `<span class="font-bold mr-2">${optionLetters[index]}.</span> ${option}`;
+                    button.onclick = () => handleAnswer(index, optionLetters[index]);
+                    answerArea.appendChild(button);
+                });
+                
+                // 如果已作答，恢复状态
+                if (state.userAnswers[state.currentIndex] !== null) {
+                    restoreAnswerState();
+                }
+            }
+            
+            // 渲染填空题
+            function renderFillInTheBlank(question) {
+                const container = document.createElement('div');
+                container.className = 'flex items-center space-x-2';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'fill-in-blank-input';
+                input.className = 'flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400';
+                input.placeholder = '请输入答案...';
+
+                const submitBtn = document.createElement('button');
+                submitBtn.textContent = '提交答案';
+                submitBtn.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors';
+                submitBtn.onclick = () => handleSubmitFillIn();
+                
+                container.appendChild(input);
+                container.appendChild(submitBtn);
+                answerArea.appendChild(container);
+                
+                // 如果已作答，恢复状态
+                if (state.userAnswers[state.currentIndex] !== null) {
+                    restoreAnswerState();
+                }
+            }
+
+            // 处理选择题答案
+            function handleAnswer(selectedIndex, selectedOptionLetter) {
+                // 如果已经回答过，则不处理
+                if (state.userAnswers[state.currentIndex] !== null) return;
+
+                const question = state.questions[state.currentIndex];
+                const isCorrect = selectedOptionLetter === question.answer;
+
+                state.userAnswers[state.currentIndex] = {
+                    selected: selectedIndex,
+                    isCorrect: isCorrect
+                };
+
+                updateNavbar();
+                applyAnswerStyles();
+            }
+            
+            // 处理填空题答案
+            function handleSubmitFillIn() {
+                 // 如果已经回答过，则不处理
+                if (state.userAnswers[state.currentIndex] !== null) return;
+
+                const question = state.questions[state.currentIndex];
+                const input = document.getElementById('fill-in-blank-input');
+                const userAnswer = input.value.trim();
+
+                if (userAnswer === '') return; // 不允许提交空答案
+
+                const isCorrect = userAnswer === question.answer;
+
+                state.userAnswers[state.currentIndex] = {
+                    selected: userAnswer,
+                    isCorrect: isCorrect
+                };
+                
+                updateNavbar();
+                applyAnswerStyles();
+            }
+            
+            // 恢复已答题目的状态
+            function restoreAnswerState() {
+                applyAnswerStyles();
+            }
+
+            // 应用答案反馈的样式
+            function applyAnswerStyles() {
+                const answerData = state.userAnswers[state.currentIndex];
+                if (answerData === null) return;
+
+                const question = state.questions[state.currentIndex];
+
+                if (question.type === 'multipleChoice') {
+                    const buttons = answerArea.querySelectorAll('button');
+                    const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(question.answer);
+
+                    buttons.forEach((button, index) => {
+                        button.disabled = true; // 锁定所有选项
+                        button.classList.remove('hover:bg-gray-100');
+                        
+                        // 恢复基础样式再应用状态样式
+                        button.className = 'w-full text-left p-3 rounded-lg border border-gray-300';
+                        
+                        if (index === correctIndex) {
+                            button.className += ' border-2 border-green-500 bg-green-100 text-green-800';
+                        }
+                        
+                        if (index === answerData.selected && !answerData.isCorrect) {
+                            button.className += ' border-2 border-red-500 bg-red-100 text-red-800';
+                        } else if (index === answerData.selected) {
+                             button.className += ' border-2 border-green-500 bg-green-100 text-green-800';
+                        }
+                    });
+                } else { // fillInTheBlank
+                    const input = document.getElementById('fill-in-blank-input');
+                    const submitBtn = input.nextElementSibling;
+                    
+                    input.value = answerData.selected;
+                    input.disabled = true;
+                    submitBtn.disabled = true;
+
+                    // 移除旧的答案提示
+                    const oldFeedback = answerArea.querySelector('.feedback-text');
+                    if(oldFeedback) oldFeedback.remove();
+
+                    if(answerData.isCorrect) {
+                        input.className = 'flex-grow p-2 border-2 border-green-500 bg-green-100 rounded-lg';
+                    } else {
+                        input.className = 'flex-grow p-2 border-2 border-red-500 bg-red-100 rounded-lg';
+                        const feedbackText = document.createElement('p');
+                        feedbackText.className = 'text-red-600 mt-2 feedback-text';
+                        feedbackText.textContent = `正确答案：${question.answer}`;
+                        answerArea.appendChild(feedbackText);
+                    }
+                }
+            }
+
+
+            // 渲染底部导航栏
+            function renderNavbar() {
+                navbarContainer.innerHTML = '';
+                state.questions.forEach((_, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = index + 1;
+                    button.className = 'w-10 h-10 flex-shrink-0 rounded-md font-mono transition-colors focus:outline-none';
+                    
+                    // 设置初始样式
+                    updateButtonStatus(button, index);
+
+                    button.onclick = () => goToQuestion(index);
+                    navbarContainer.appendChild(button);
+                });
+            }
+
+            // 更新底部导航栏状态
+            function updateNavbar() {
+                const buttons = navbarContainer.querySelectorAll('button');
+                buttons.forEach((button, index) => {
+                    updateButtonStatus(button, index);
+                });
+            }
+
+            // 更新单个导航按钮的状态
+            function updateButtonStatus(button, index) {
+                const answer = state.userAnswers[index];
+                let baseStyle = 'border ';
+
+                if (index === state.currentIndex) {
+                    baseStyle += 'bg-blue-500 text-white border-blue-500';
+                } else if (answer === null) {
+                    baseStyle += 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100';
+                } else if (answer.isCorrect) {
+                    baseStyle += 'bg-green-200 text-green-800 border-green-300';
+                } else {
+                    baseStyle += 'bg-red-200 text-red-800 border-red-300';
+                }
+                button.className = `w-10 h-10 flex-shrink-0 rounded-md font-mono transition-colors focus:outline-none ${baseStyle}`;
+            }
+            
+            // 跳转到指定题目
+            function goToQuestion(index) {
+                if (index >= 0 && index < state.questions.length) {
+                    state.currentIndex = index;
+                    renderQuestion();
+                    updateNavbar();
+                    
+                    // 滚动导航栏使当前按钮可见
+                    const currentBtn = navbarContainer.children[index];
+                    if (currentBtn) {
+                        currentBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                }
+            }
+
+            // 显示下一题
+            function showNext() {
+                goToQuestion(state.currentIndex + 1);
+            }
+
+            // 显示上一题
+            function showPrev() {
+                goToQuestion(state.currentIndex - 1);
+            }
+
+            // 显示结果
+            function showResults() {
+                const correctAnswers = state.userAnswers.filter(a => a && a.isCorrect).length;
+                const totalQuestions = state.questions.length;
+                const percentage = totalQuestions > 0 ? ((correctAnswers / totalQuestions) * 100).toFixed(1) : 0;
+                scoreText.textContent = `答对题数 ${correctAnswers} / ${totalQuestions} (正确率 ${percentage}%)`;
+                
+                quizView.classList.add('hidden');
+                resultView.classList.remove('hidden');
+            }
+
+            // 重新开始
+            function restartQuiz() {
+                state.currentIndex = 0;
+                state.userAnswers.fill(null);
+                
+                resultView.classList.add('hidden');
+                quizView.classList.remove('hidden');
+
+                renderQuestion();
+                updateNavbar();
+            }
+
+            // 初始化应用
+            init();
+        }
+
+        // 确保在MathJax加载并准备好后再执行主应用逻辑
+        if (window.MathJax && window.MathJax.startup) {
+            window.MathJax.startup.promise.then(mainApp);
+        } else {
+            // Fallback if MathJax is not loaded yet
+            document.addEventListener('DOMContentLoaded', mainApp);
+        }
+
+    </script>
+</body>
+</html>
