@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资料合集</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    :root {
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-primary-container: #EADDFF;
+      --md-sys-color-on-primary-container: #21005D;
+      --md-sys-color-secondary: #625B71;
+      --md-sys-color-secondary-container: #E8DEF8;
+      --md-sys-color-surface: #FFFBFE;
+      --md-sys-color-surface-variant: #E7E0EC;
+      --md-sys-color-background: #FFFBFE;
+      --md-sys-color-on-surface: #1C1B1F;
+      --md-sys-color-on-surface-variant: #49454F;
+      --md-sys-color-outline: #79747E;
+      --md-sys-color-outline-variant: #CAC4D0;
+      --md-sys-elevation-1: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.3);
+      --md-sys-elevation-2: 0px 2px 6px 2px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.3);
+      --md-sys-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.3);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+      background-color: var(--md-sys-color-background);
+      color: var(--md-sys-color-on-surface);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .app-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 64px;
+      background-color: var(--md-sys-color-surface);
+      box-shadow: var(--md-sys-elevation-2);
+      display: flex; align-items: center; padding: 0 16px; z-index: 100; gap: 16px;
+    }
+    .app-bar .logo {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.25rem; font-weight: 500; color: var(--md-sys-color-on-surface); text-decoration: none;
+    }
+    .app-bar .logo .material-icons-round { font-size: 28px; color: var(--md-sys-color-primary); }
+    .search-container { flex: 1; max-width: 600px; position: relative; }
+    .search-container input {
+      width: 100%; height: 48px; border-radius: 28px; border: 1px solid var(--md-sys-color-outline-variant);
+      background-color: var(--md-sys-color-surface-variant); padding: 0 16px 0 48px;
+      font-size: 1rem; font-family: inherit; color: var(--md-sys-color-on-surface); outline: none; transition: all 0.2s ease;
+    }
+    .search-container input:focus { border-color: var(--md-sys-color-primary); background-color: var(--md-sys-color-surface); }
+    .search-container .material-icons-round { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--md-sys-color-on-surface-variant); pointer-events: none; }
+    .main-content { padding: 88px 16px 32px; max-width: 1400px; margin: 0 auto; min-height: 100vh; }
+    .breadcrumbs { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; min-height: 24px; }
+    .breadcrumb-item { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); }
+    .breadcrumb-item a { color: var(--md-sys-color-primary); text-decoration: none; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+    .breadcrumb-item a:hover { background-color: var(--md-sys-color-primary-container); }
+    .breadcrumb-item.current { color: var(--md-sys-color-on-surface); font-weight: 500; padding: 4px 8px; }
+    .section-title { font-size: 1.5rem; font-weight: 400; color: var(--md-sys-color-on-surface); margin-bottom: 16px; letter-spacing: 0.015em; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .md-card {
+      background-color: var(--md-sys-color-surface); border-radius: 12px; box-shadow: var(--md-sys-elevation-1);
+      overflow: hidden; cursor: pointer; transition: box-shadow 0.2s ease, transform 0.15s ease;
+      text-decoration: none; color: inherit; display: flex; flex-direction: column; position: relative;
+    }
+    .md-card:hover { box-shadow: var(--md-sys-elevation-3); transform: translateY(-2px); }
+    .md-card:active { transform: translateY(0); }
+    .card-header { padding: 16px 16px 8px; display: flex; align-items: flex-start; gap: 16px; }
+    .card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-icon.folder { background-color: #E8DEF8; color: #6750A4; }
+    .card-icon.pdf { background-color: #F9DEDC; color: #B3261E; }
+    .card-icon.doc { background-color: #E0EFFF; color: #00639B; }
+    .card-icon.ppt { background-color: #FFF2DF; color: #8C4F00; }
+    .card-icon.img { background-color: #E6F5E6; color: #2E7D32; }
+    .card-icon.zip { background-color: #F3E5F5; color: #7B1FA2; }
+    .card-icon.txt { background-color: #F5F5F5; color: #616161; }
+    .card-icon.default { background-color: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); }
+    .card-icon .material-icons-round { font-size: 24px; }
+    .card-content { flex: 1; min-width: 0; }
+    .card-title { font-size: 1rem; font-weight: 500; color: var(--md-sys-color-on-surface); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+    .card-subtitle { font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-list-container { background-color: var(--md-sys-color-surface); border-radius: 16px; box-shadow: var(--md-sys-elevation-1); overflow: hidden; }
+    .file-list { padding: 8px; }
+    .list-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 12px; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; }
+    .list-item:hover { background-color: var(--md-sys-color-surface-variant); }
+    .list-item-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .list-item-content { flex: 1; min-width: 0; }
+    .list-item-title { font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list-item-subtitle { font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); margin-top: 2px; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 16px; text-align: center; color: var(--md-sys-color-on-surface-variant); }
+    .empty-state .material-icons-round { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 8px; color: var(--md-sys-color-on-surface); }
+    .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border: none; box-shadow: var(--md-sys-elevation-3); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 90; transition: box-shadow 0.2s, transform 0.15s; }
+    .fab:hover { box-shadow: 0px 6px 10px 4px rgba(0,0,0,0.15), 0px 2px 3px 0px rgba(0,0,0,0.3); transform: translateY(-2px); }
+    .fab:active { transform: translateY(0); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    @media (max-width: 600px) {
+      .app-bar { padding: 0 12px; gap: 8px; }
+      .app-bar .logo span:not(.material-icons-round) { display: none; }
+      .search-container input { height: 40px; font-size: 0.875rem; }
+      .main-content { padding: 76px 12px 24px; }
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <a href="#" class="logo" onclick="app.goHome(); return false;">
+      <span class="material-icons-round">folder_open</span>
+      <span>资料合集</span>
+    </a>
+    <div class="search-container">
+      <span class="material-icons-round">search</span>
+      <input type="text" id="searchInput" placeholder="搜索文件或文件夹..." oninput="app.handleSearch(this.value)">
+    </div>
+  </header>
+  <main class="main-content" id="mainContent"></main>
+  <button class="fab" id="scrollTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none;">
+    <span class="material-icons-round">arrow_upward</span>
+  </button>
+  <script>
+    const FILE_TREE = [{"name":"python","path":"python","type":"folder","children":[{"name":"python总复习.docx","path":"python/python总复习.docx","type":"file"}]},{"name":"README.md","path":"README.md","type":"file"},{"name":"习概","path":"习概","type":"folder","children":[{"name":"2024习概题库.docx","path":"习概/2024习概题库.docx","type":"file"}]},{"name":"复变函数","path":"复变函数","type":"folder","children":[{"name":"1_复变期末试卷.pdf","path":"复变函数/1_复变期末试卷.pdf","type":"file"},{"name":"1_复变期末试卷答案.pdf","path":"复变函数/1_复变期末试卷答案.pdf","type":"file"},{"name":"复变.pdf","path":"复变函数/复变.pdf","type":"file"},{"name":"复变函数","path":"复变函数/复变函数","type":"folder","children":[{"name":"Gallery","path":"复变函数/复变函数/Gallery","type":"folder","children":[{"name":"复变函数与积分变换期末卷(一).pdf","path":"复变函数/复变函数/Gallery/复变函数与积分变换期末卷(一).pdf","type":"file"},{"name":"复变函数与积分变换期末卷(三).pdf","path":"复变函数/复变函数/Gallery/复变函数与积分变换期末卷(三).pdf","type":"file"},{"name":"复变函数与积分变换期末卷(二).pdf","path":"复变函数/复变函数/Gallery/复变函数与积分变换期末卷(二).pdf","type":"file"},{"name":"复变函数与积分变换期末卷(四).pdf","path":"复变函数/复变函数/Gallery/复变函数与积分变换期末卷(四).pdf","type":"file"},{"name":"复变期末试卷.pdf","path":"复变函数/复变函数/Gallery/复变期末试卷.pdf","type":"file"},{"name":"复变期末试卷参考答案.pdf","path":"复变函数/复变函数/Gallery/复变期末试卷参考答案.pdf","type":"file"}]},{"name":"QQBrowser","path":"复变函数/复变函数/QQBrowser","type":"folder","children":[{"name":"1705448771143","path":"复变函数/复变函数/QQBrowser/1705448771143","type":"folder","children":[{"name":"editcopyfiles","path":"复变函数/复变函数/QQBrowser/1705448771143/editcopyfiles","type":"folder","children":[{"name":"afd2449ed198a632076aadf815e6c8fd","path":"复变函数/复变函数/QQBrowser/1705448771143/editcopyfiles/afd2449ed198a632076aadf815e6c8fd","type":"folder","children":[{"name":"复变函数与积分变换习题册.pdf","path":"复变函数/复变函数/QQBrowser/1705448771143/editcopyfiles/afd2449ed198a632076aadf815e6c8fd/复变函数与积分变换习题册.pdf","type":"file"}]}]}]}]}]},{"name":"复变函数与积分变换期末考试模拟试卷及答案 (2)(1).docx","path":"复变函数/复变函数与积分变换期末考试模拟试卷及答案 (2)(1).docx","type":"file"},{"name":"课件","path":"复变函数/课件","type":"folder","children":[{"name":"1.1 复数的运算及几何表示.pptx","path":"复变函数/课件/1.1 复数的运算及几何表示.pptx","type":"file"},{"name":"1.2 复平面上的点集 (1).pptx","path":"复变函数/课件/1.2 复平面上的点集 (1).pptx","type":"file"},{"name":"1.2 复平面上的点集.pptx","path":"复变函数/课件/1.2 复平面上的点集.pptx","type":"file"},{"name":"2.1 复变函数的极限与连续性 (1).pptx","path":"复变函数/课件/2.1 复变函数的极限与连续性 (1).pptx","type":"file"},{"name":"2.1 复变函数的极限与连续性.pptx","path":"复变函数/课件/2.1 复变函数的极限与连续性.pptx","type":"file"},{"name":"2.2 解析函数的概念.pptx","path":"复变函数/课件/2.2 解析函数的概念.pptx","type":"file"},{"name":"2.3 C-R条件 - 副本.pptx","path":"复变函数/课件/2.3 C-R条件 - 副本.pptx","type":"file"},{"name":"3.1 复变函数的积分.pptx","path":"复变函数/课件/3.1 复变函数的积分.pptx","type":"file"},{"name":"3.2 柯西-古萨定理及其推广.pptx","path":"复变函数/课件/3.2 柯西-古萨定理及其推广.pptx","type":"file"},{"name":"3.3 柯西积分公式及推论.pptx","path":"复变函数/课件/3.3 柯西积分公式及推论.pptx","type":"file"},{"name":"3.4 解析函数与调和函数的关系.pptx","path":"复变函数/课件/3.4 解析函数与调和函数的关系.pptx","type":"file"},{"name":"4.1 复数项级数.pptx","path":"复变函数/课件/4.1 复数项级数.pptx","type":"file"},{"name":"4.2 幂级数.pptx","path":"复变函数/课件/4.2 幂级数.pptx","type":"file"},{"name":"4.4.pptx","path":"复变函数/课件/4.4.pptx","type":"file"},{"name":"5.2 留数在积分计算中的应用.pptx","path":"复变函数/课件/5.2 留数在积分计算中的应用.pptx","type":"file"},{"name":"实数项无穷级数的敛散性.pptx","path":"复变函数/课件/实数项无穷级数的敛散性.pptx","type":"file"}]}]},{"name":"大学化学","path":"大学化学","type":"folder","children":[{"name":"大学化学总复习.pptx","path":"大学化学/大学化学总复习.pptx","type":"file"}]},{"name":"大物","path":"大物","type":"folder","children":[{"name":"大学物理B上习题加综合练习.pdf","path":"大物/大学物理B上习题加综合练习.pdf","type":"file"},{"name":"大学物理B下-练习题.pdf","path":"大物/大学物理B下-练习题.pdf","type":"file"},{"name":"大学物理B下自测题_计算题.pptx","path":"大物/大学物理B下自测题_计算题.pptx","type":"file"},{"name":"大物B上","path":"大物/大物B上","type":"folder","children":[{"name":"mmexport1745391468640.jpg","path":"大物/大物B上/mmexport1745391468640.jpg","type":"file"},{"name":"mmexport1745391475347.jpg","path":"大物/大物B上/mmexport1745391475347.jpg","type":"file"},{"name":"物理b期末试卷.pdf","path":"大物/大物B上/物理b期末试卷.pdf","type":"file"},{"name":"物理试卷.docx","path":"大物/大物B上/物理试卷.docx","type":"file"},{"name":"选择题刷题.html","path":"大物/大物B上/选择题刷题.html","type":"file"}]},{"name":"大物B下","path":"大物/大物B下","type":"folder","children":[{"name":"微信图片_20250114214114.jpg","path":"大物/大物B下/微信图片_20250114214114.jpg","type":"file"},{"name":"微信图片_20250114214123.jpg","path":"大物/大物B下/微信图片_20250114214123.jpg","type":"file"},{"name":"微信图片_20250114214128.jpg","path":"大物/大物B下/微信图片_20250114214128.jpg","type":"file"},{"name":"微信图片_20250114214131.jpg","path":"大物/大物B下/微信图片_20250114214131.jpg","type":"file"}]},{"name":"大物上A","path":"大物/大物上A","type":"folder","children":[{"name":"答案","path":"大物/大物上A/答案","type":"folder","children":[{"name":"第10章 热力学第一定律解答.docx","path":"大物/大物上A/答案/第10章 热力学第一定律解答.docx","type":"file"},{"name":"第11章 热力学第二定律解答.docx","path":"大物/大物上A/答案/第11章 热力学第二定律解答.docx","type":"file"},{"name":"第1章 质点运动学解答.pdf","path":"大物/大物上A/答案/第1章 质点运动学解答.pdf","type":"file"},{"name":"第2章 运动与力解答.pdf","path":"大物/大物上A/答案/第2章 运动与力解答.pdf","type":"file"},{"name":"第3章 动量与角动量解答.pdf","path":"大物/大物上A/答案/第3章 动量与角动量解答.pdf","type":"file"},{"name":"第4章 功和能解答.pdf","path":"大物/大物上A/答案/第4章 功和能解答.pdf","type":"file"},{"name":"第5章 刚体的转动解答.pdf","path":"大物/大物上A/答案/第5章 刚体的转动解答.pdf","type":"file"},{"name":"第6章 振动解答.pdf","path":"大物/大物上A/答案/第6章 振动解答.pdf","type":"file"},{"name":"第7章 波动解答.pdf","path":"大物/大物上A/答案/第7章 波动解答.pdf","type":"file"},{"name":"第8章 狭义相对论基础解答.pdf","path":"大物/大物上A/答案/第8章 狭义相对论基础解答.pdf","type":"file"},{"name":"第9章 温度和气体动理论解答.docx","path":"大物/大物上A/答案/第9章 温度和气体动理论解答.docx","type":"file"}]},{"name":"题目","path":"大物/大物上A/题目","type":"folder","children":[{"name":"第一章物理.pdf","path":"大物/大物上A/题目/第一章物理.pdf","type":"file"},{"name":"第七章物理.pdf","path":"大物/大物上A/题目/第七章物理.pdf","type":"file"},{"name":"第三四章物理.pdf","path":"大物/大物上A/题目/第三四章物理.pdf","type":"file"},{"name":"第九章物理.pdf","path":"大物/大物上A/题目/第九章物理.pdf","type":"file"},{"name":"第二章物理.pdf","path":"大物/大物上A/题目/第二章物理.pdf","type":"file"},{"name":"第五章物理.pdf","path":"大物/大物上A/题目/第五章物理.pdf","type":"file"},{"name":"第八章物理.pdf","path":"大物/大物上A/题目/第八章物理.pdf","type":"file"},{"name":"第六章物理.pdf","path":"大物/大物上A/题目/第六章物理.pdf","type":"file"},{"name":"第十一章物理.pdf","path":"大物/大物上A/题目/第十一章物理.pdf","type":"file"},{"name":"第十章物理.pdf","path":"大物/大物上A/题目/第十章物理.pdf","type":"file"}]}]},{"name":"大物选择题题库.txt","path":"大物/大物选择题题库.txt","type":"file"}]},{"name":"学生手册题库.docx","path":"学生手册题库.docx","type":"file"},{"name":"工图","path":"工图","type":"folder","children":[{"name":"2022级期末复习.ppt","path":"工图/2022级期末复习.ppt","type":"file"},{"name":"20级测绘画几与制图试卷 （A）参考答案.pdf","path":"工图/20级测绘画几与制图试卷 （A）参考答案.pdf","type":"file"},{"name":"工程制图习题集（第3版）习题解答(1).zip","path":"工图/工程制图习题集（第3版）习题解答(1).zip","type":"file"},{"name":"模拟卷.pdf","path":"工图/模拟卷.pdf","type":"file"},{"name":"黄大兵测绘画几与制图试卷 （A） (z).pdf","path":"工图/黄大兵测绘画几与制图试卷 （A） (z).pdf","type":"file"}]},{"name":"工程英语","path":"工程英语","type":"folder","children":[{"name":"Economic evaluation范例（Section D）.docx","path":"工程英语/Economic evaluation范例（Section D）.docx","type":"file"},{"name":"MoM 模板.docx","path":"工程英语/MoM 模板.docx","type":"file"},{"name":"Unit 1 参考答案.docx","path":"工程英语/Unit 1 参考答案.docx","type":"file"},{"name":"Unit 6 参考答案.doc","path":"工程英语/Unit 6 参考答案.doc","type":"file"},{"name":"Unit 7 参考答案.docx","path":"工程英语/Unit 7 参考答案.docx","type":"file"},{"name":"招标公告的范例1（Section C).doc","path":"工程英语/招标公告的范例1（Section C).doc","type":"file"},{"name":"范文.docx","path":"工程英语/范文.docx","type":"file"},{"name":"谅解备忘录的英文模板（Section C).docx","path":"工程英语/谅解备忘录的英文模板（Section C).docx","type":"file"}]},{"name":"数据结构与算法","path":"数据结构与算法","type":"folder","children":[{"name":"部分题库.xlsx","path":"数据结构与算法/部分题库.xlsx","type":"file"}]},{"name":"材料力学","path":"材料力学","type":"folder","children":[{"name":"材力B期末模拟试卷-2023.pdf","path":"材料力学/材力B期末模拟试卷-2023.pdf","type":"file"},{"name":"材力B期末模拟试卷-2023_202312302039_30238.pdf","path":"材料力学/材力B期末模拟试卷-2023_202312302039_30238.pdf","type":"file"},{"name":"材料力学总结(1)_202312302039_53762.pdf","path":"材料力学/材料力学总结(1)_202312302039_53762.pdf","type":"file"},{"name":"材料力学笔记.pdf","path":"材料力学/材料力学笔记.pdf","type":"file"}]},{"name":"概率论","path":"概率论","type":"folder","children":[{"name":"00概率论期末考试真题新.pdf","path":"概率论/00概率论期末考试真题新.pdf","type":"file"},{"name":"《概率统计》速成课配套电子讲义(1).pdf","path":"概率论/《概率统计》速成课配套电子讲义(1).pdf","type":"file"},{"name":"微信图片_20250109205151.jpg","path":"概率论/微信图片_20250109205151.jpg","type":"file"},{"name":"微信图片_20250109205211.jpg","path":"概率论/微信图片_20250109205211.jpg","type":"file"},{"name":"微信图片_20250109205214.jpg","path":"概率论/微信图片_20250109205214.jpg","type":"file"},{"name":"微信图片_20250109205218.jpg","path":"概率论/微信图片_20250109205218.jpg","type":"file"}]},{"name":"毛概","path":"毛概","type":"folder","children":[{"name":"2_第一章练习题（无答案）(1).docx","path":"毛概/2_第一章练习题（无答案）(1).docx","type":"file"},{"name":"毛概-选择（附答案）.doc","path":"毛概/毛概-选择（附答案）.doc","type":"file"},{"name":"第七章练习题（无答案）.docx","path":"毛概/第七章练习题（无答案）.docx","type":"file"},{"name":"第三章练习题（无答案）(1).docx","path":"毛概/第三章练习题（无答案）(1).docx","type":"file"},{"name":"第二章练习题（无答案）(1).docx","path":"毛概/第二章练习题（无答案）(1).docx","type":"file"},{"name":"第五章练习体（无答案）(1).docx","path":"毛概/第五章练习体（无答案）(1).docx","type":"file"},{"name":"第八章练习题（无答案）.docx","path":"毛概/第八章练习题（无答案）.docx","type":"file"},{"name":"第六章练习题（无答案）.docx","path":"毛概/第六章练习题（无答案）.docx","type":"file"},{"name":"第四章练习题（无答案）(1).docx","path":"毛概/第四章练习题（无答案）(1).docx","type":"file"}]},{"name":"电机","path":"电机","type":"folder","children":[{"name":"电机上","path":"电机/电机上","type":"folder","children":[{"name":"1.pdf","path":"电机/电机上/1.pdf","type":"file"},{"name":"2.pdf","path":"电机/电机上/2.pdf","type":"file"},{"name":"3.pdf","path":"电机/电机上/3.pdf","type":"file"},{"name":"电机学A（上）期中考试试题.pdf","path":"电机/电机上/电机学A（上）期中考试试题.pdf","type":"file"},{"name":"电机学A（上）期中考试试题与答案.pdf","path":"电机/电机上/电机学A（上）期中考试试题与答案.pdf","type":"file"}]},{"name":"电机下","path":"电机/电机下","type":"folder","children":[{"name":"2025年电气工程专业电机学A期中考试答案.pdf","path":"电机/电机下/2025年电气工程专业电机学A期中考试答案.pdf","type":"file"},{"name":"4. 周腊吾----2023年《电机学》A（下）期中考试试卷参考答案（20230407）.pdf","path":"电机/电机下/4. 周腊吾----2023年《电机学》A（下）期中考试试卷参考答案（20230407）.pdf","type":"file"},{"name":"电机(下)期中试卷.pdf","path":"电机/电机下/电机(下)期中试卷.pdf","type":"file"},{"name":"电机文稿1.pdf","path":"电机/电机下/电机文稿1.pdf","type":"file"},{"name":"电机（下）期中.pdf","path":"电机/电机下/电机（下）期中.pdf","type":"file"}]}]},{"name":"电磁场","path":"电磁场","type":"folder","children":[{"name":"微信图片_20250107222747.jpg","path":"电磁场/微信图片_20250107222747.jpg","type":"file"},{"name":"微信图片_20250107222807.jpg","path":"电磁场/微信图片_20250107222807.jpg","type":"file"},{"name":"微信图片_20250107222811.jpg","path":"电磁场/微信图片_20250107222811.jpg","type":"file"},{"name":"微信图片_20250107222823.jpg","path":"电磁场/微信图片_20250107222823.jpg","type":"file"},{"name":"考点梳理.doc","path":"电磁场/考点梳理.doc","type":"file"}]},{"name":"电路","path":"电路","type":"folder","children":[{"name":"电路上","path":"电路/电路上","type":"folder","children":[{"name":"电路(上)考试复习提纲(1).doc","path":"电路/电路上/电路(上)考试复习提纲(1).doc","type":"file"},{"name":"电路a上.docx","path":"电路/电路上/电路a上.docx","type":"file"},{"name":"电路A（上）模拟卷.pdf","path":"电路/电路上/电路A（上）模拟卷.pdf","type":"file"},{"name":"电路A（上）模拟卷答案.pdf","path":"电路/电路上/电路A（上）模拟卷答案.pdf","type":"file"}]},{"name":"电路下","path":"电路/电路下","type":"folder","children":[{"name":"电路B下","path":"电路/电路下/电路B下","type":"folder","children":[{"name":"微信图片_20251224172438_189_665.jpg","path":"电路/电路下/电路B下/微信图片_20251224172438_189_665.jpg","type":"file"},{"name":"微信图片_20251224172439_190_665.jpg","path":"电路/电路下/电路B下/微信图片_20251224172439_190_665.jpg","type":"file"},{"name":"微信图片_20251224172441_191_665.jpg","path":"电路/电路下/电路B下/微信图片_20251224172441_191_665.jpg","type":"file"},{"name":"微信图片_20251224172442_192_665.jpg","path":"电路/电路下/电路B下/微信图片_20251224172442_192_665.jpg","type":"file"}]},{"name":"试卷一","path":"电路/电路下/试卷一","type":"folder","children":[{"name":"mmexport1764520142615.jpg","path":"电路/电路下/试卷一/mmexport1764520142615.jpg","type":"file"},{"name":"mmexport1764520144595.jpg","path":"电路/电路下/试卷一/mmexport1764520144595.jpg","type":"file"},{"name":"mmexport1764520146348.jpg","path":"电路/电路下/试卷一/mmexport1764520146348.jpg","type":"file"},{"name":"mmexport1764520147980.jpg","path":"电路/电路下/试卷一/mmexport1764520147980.jpg","type":"file"}]},{"name":"试卷二","path":"电路/电路下/试卷二","type":"folder","children":[{"name":"电路理论A(下)模拟卷答案 .pdf","path":"电路/电路下/试卷二/电路理论A(下)模拟卷答案 .pdf","type":"file"},{"name":"电路理论A下模拟卷 .pdf","path":"电路/电路下/试卷二/电路理论A下模拟卷 .pdf","type":"file"}]},{"name":"试卷合集（没答案）.pdf","path":"电路/电路下/试卷合集（没答案）.pdf","type":"file"}]}]},{"name":"线代","path":"线代","type":"folder","children":[{"name":"05线性代数真题(1)","path":"线代/05线性代数真题(1)","type":"folder","children":[{"name":"05线性代数","path":"线代/05线性代数真题(1)/05线性代数","type":"folder","children":[{"name":"2023-2024（一）线性代数期末试卷及答案","path":"线代/05线性代数真题(1)/05线性代数/2023-2024（一）线性代数期末试卷及答案","type":"folder","children":[{"name":"4E}TCT$%`_X{EGE3TU7@8N3_tmb.jpg","path":"线代/05线性代数真题(1)/05线性代数/2023-2024（一）线性代数期末试卷及答案/4E}TCT$%`_X{EGE3TU7@8N3_tmb.jpg","type":"file"},{"name":"答案.pdf","path":"线代/05线性代数真题(1)/05线性代数/2023-2024（一）线性代数期末试卷及答案/答案.pdf","type":"file"}]},{"name":"其他","path":"线代/05线性代数真题(1)/05线性代数/其他","type":"folder","children":[{"name":"6E{DS4H}00~_IL8E@OL[7`A_tmb.jpg","path":"线代/05线性代数真题(1)/05线性代数/其他/6E{DS4H}00~_IL8E@OL[7`A_tmb.jpg","type":"file"},{"name":"WH}S`_[KR)`$0%1OTHR7BX7_tmb.jpg","path":"线代/05线性代数真题(1)/05线性代数/其他/WH}S`_[KR)`$0%1OTHR7BX7_tmb.jpg","type":"file"}]}]}]},{"name":"2022-2023-1线性代数期末试卷及答案 图片.pdf","path":"线代/2022-2023-1线性代数期末试卷及答案 图片.pdf","type":"file"},{"name":"2022-2023-1线性代数期末试卷及答案.pdf","path":"线代/2022-2023-1线性代数期末试卷及答案.pdf","type":"file"},{"name":"2023-2024-1线性代数期末考试试卷及答案 图片.pdf","path":"线代/2023-2024-1线性代数期末考试试卷及答案 图片.pdf","type":"file"},{"name":"2023-2024-1线性代数期末考试试卷及答案.pdf","path":"线代/2023-2024-1线性代数期末考试试卷及答案.pdf","type":"file"},{"name":"2023-2024-2线性代数期末考试试卷及答案.pdf","path":"线代/2023-2024-2线性代数期末考试试卷及答案.pdf","type":"file"},{"name":"2024-2025-2线性代数期末考试试卷及答案 图片.pdf","path":"线代/2024-2025-2线性代数期末考试试卷及答案 图片.pdf","type":"file"},{"name":"2025线代.pdf","path":"线代/2025线代.pdf","type":"file"},{"name":"线性代数22种题型及思维定式(1).pdf","path":"线代/线性代数22种题型及思维定式(1).pdf","type":"file"},{"name":"线性代数复习与总结.pdf","path":"线代/线性代数复习与总结.pdf","type":"file"},{"name":"线性代数期末试卷及答案拍照.pdf","path":"线代/线性代数期末试卷及答案拍照.pdf","type":"file"},{"name":"线性代数终极总结(1).pdf","path":"线代/线性代数终极总结(1).pdf","type":"file"},{"name":"长沙理工大学考试试卷.pdf","path":"线代/长沙理工大学考试试卷.pdf","type":"file"}]},{"name":"近代史","path":"近代史","type":"folder","children":[{"name":"近代史1190题题库.xls","path":"近代史/近代史1190题题库.xls","type":"file"}]},{"name":"马原","path":"马原","type":"folder","children":[{"name":"马原1000机考题库.doc","path":"马原/马原1000机考题库.doc","type":"file"}]},{"name":"高数","path":"高数","type":"folder","children":[{"name":"24年数A数B期中考试题.pdf","path":"高数/24年数A数B期中考试题.pdf","type":"file"},{"name":"学校高数卷子下册","path":"高数/学校高数卷子下册","type":"folder","children":[{"name":"__MACOSX","path":"高数/学校高数卷子下册/__MACOSX","type":"folder","children":[{"name":"学校高数卷子","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子","type":"folder","children":[{"name":"高等数学下","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下","type":"folder","children":[{"name":"高等数学下","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下","type":"folder","children":[{"name":"期中","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期中","type":"folder","children":[]},{"name":"期末","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末","type":"folder","children":[{"name":"a卷","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷","type":"folder","children":[{"name":"其他","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他","type":"folder","children":[]},{"name":"第一套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷/第一套","type":"folder","children":[]},{"name":"第三套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷/第三套","type":"folder","children":[]},{"name":"第二套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷/第二套","type":"folder","children":[]},{"name":"第五套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷/第五套","type":"folder","children":[]},{"name":"第四套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/a卷/第四套","type":"folder","children":[]}]},{"name":"b卷","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/b卷","type":"folder","children":[{"name":"高数B下期末","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末","type":"folder","children":[]}]},{"name":"城南学院","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/城南学院","type":"folder","children":[{"name":"其他","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他","type":"folder","children":[]},{"name":"第一套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第一套","type":"folder","children":[]},{"name":"第二套","path":"高数/学校高数卷子下册/__MACOSX/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第二套","type":"folder","children":[]}]}]}]}]}]}]},{"name":"学校高数卷子","path":"高数/学校高数卷子下册/学校高数卷子","type":"folder","children":[{"name":"高等数学下","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下","type":"folder","children":[{"name":"高等数学下","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下","type":"folder","children":[{"name":"期中","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中","type":"folder","children":[{"name":"1","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/1","type":"folder","children":[{"name":"61B8865EDFED58E28F6EE06D605E3880.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/1/61B8865EDFED58E28F6EE06D605E3880.jpg","type":"file"},{"name":"B16561C2B25828AD5B3FE647E473DD60.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/1/B16561C2B25828AD5B3FE647E473DD60.jpg","type":"file"},{"name":"QQ图片20240618144903.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/1/QQ图片20240618144903.jpg","type":"file"}]},{"name":"2","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/2","type":"folder","children":[{"name":"061D784F5BE714D733656B16A114C08C.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/2/061D784F5BE714D733656B16A114C08C.jpg","type":"file"},{"name":"134BB249CCE4C603EA34EE5F94C6C61C.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/2/134BB249CCE4C603EA34EE5F94C6C61C.jpg","type":"file"},{"name":"17E7A37A580BB71600B66AB84D6363A7.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/2/17E7A37A580BB71600B66AB84D6363A7.jpg","type":"file"},{"name":"7E945AD4F7E940974A6A8787F1D9AD30.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期中/2/7E945AD4F7E940974A6A8787F1D9AD30.jpg","type":"file"}]}]},{"name":"期末","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末","type":"folder","children":[{"name":"a卷","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷","type":"folder","children":[{"name":"其他","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他","type":"folder","children":[{"name":"8K@PI0T[`H]]OLU{182`M$9_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/8K@PI0T[`H]]OLU{182`M$9_tmb(1).jpg","type":"file"},{"name":"8K@PI0T[`H]]OLU{182`M$9_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/8K@PI0T[`H]]OLU{182`M$9_tmb.jpg","type":"file"},{"name":"GSPF_WIB~XFPVW3`QFDK58C(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/GSPF_WIB~XFPVW3`QFDK58C(1).jpg","type":"file"},{"name":"GSPF_WIB~XFPVW3`QFDK58C.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/GSPF_WIB~XFPVW3`QFDK58C.jpg","type":"file"},{"name":"S${V9GSHCZTZK[HIS[42ETS(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/S${V9GSHCZTZK[HIS[42ETS(1).jpg","type":"file"},{"name":"S${V9GSHCZTZK[HIS[42ETS.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/S${V9GSHCZTZK[HIS[42ETS.jpg","type":"file"},{"name":"UO8ADKS6RIIT%ZF5(4PKB)0(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/UO8ADKS6RIIT%ZF5(4PKB)0(1).jpg","type":"file"},{"name":"UO8ADKS6RIIT%ZF5(4PKB)0.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/其他/UO8ADKS6RIIT%ZF5(4PKB)0.jpg","type":"file"}]},{"name":"第一套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第一套","type":"folder","children":[{"name":"高等数学A（2）试卷（一）5489940(1).pdf","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第一套/高等数学A（2）试卷（一）5489940(1).pdf","type":"file"},{"name":"高等数学A（2）试卷（一）5489940.pdf","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第一套/高等数学A（2）试卷（一）5489940.pdf","type":"file"}]},{"name":"第三套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第三套","type":"folder","children":[{"name":"PJ78BF483DKWQWX9ST)PX`N_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第三套/PJ78BF483DKWQWX9ST)PX`N_tmb(1).jpg","type":"file"},{"name":"PJ78BF483DKWQWX9ST)PX`N_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第三套/PJ78BF483DKWQWX9ST)PX`N_tmb.jpg","type":"file"}]},{"name":"第二套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第二套","type":"folder","children":[{"name":"高等数学A下2022级期末试卷(1).pdf","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第二套/高等数学A下2022级期末试卷(1).pdf","type":"file"},{"name":"高等数学A下2022级期末试卷.pdf","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第二套/高等数学A下2022级期末试卷.pdf","type":"file"}]},{"name":"第五套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第五套","type":"folder","children":[{"name":"FU}EQRDFE_{2015BKAT~DFM_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第五套/FU}EQRDFE_{2015BKAT~DFM_tmb(1).jpg","type":"file"},{"name":"FU}EQRDFE_{2015BKAT~DFM_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第五套/FU}EQRDFE_{2015BKAT~DFM_tmb.jpg","type":"file"}]},{"name":"第四套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第四套","type":"folder","children":[{"name":"MEF`T5CLMJ{[`PRNS()YS3U_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第四套/MEF`T5CLMJ{[`PRNS()YS3U_tmb(1).jpg","type":"file"},{"name":"MEF`T5CLMJ{[`PRNS()YS3U_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/a卷/第四套/MEF`T5CLMJ{[`PRNS()YS3U_tmb.jpg","type":"file"}]}]},{"name":"b卷","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷","type":"folder","children":[{"name":"高数B下期末","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末","type":"folder","children":[{"name":"5X9TFH]O`2EL[B5{ZRHF{XS(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/5X9TFH]O`2EL[B5{ZRHF{XS(1).jpg","type":"file"},{"name":"5X9TFH]O`2EL[B5{ZRHF{XS.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/5X9TFH]O`2EL[B5{ZRHF{XS.jpg","type":"file"},{"name":"G)EYWV37AQ9NFWMN@_P[`O4_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/G)EYWV37AQ9NFWMN@_P[`O4_tmb(1).jpg","type":"file"},{"name":"G)EYWV37AQ9NFWMN@_P[`O4_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/G)EYWV37AQ9NFWMN@_P[`O4_tmb.jpg","type":"file"},{"name":"J8F%3SESC9AJSS{[X%1[S24_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/J8F%3SESC9AJSS{[X%1[S24_tmb(1).jpg","type":"file"},{"name":"J8F%3SESC9AJSS{[X%1[S24_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/J8F%3SESC9AJSS{[X%1[S24_tmb.jpg","type":"file"},{"name":"MVB}LG2T$%0U)V}BY@E5PMP(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/MVB}LG2T$%0U)V}BY@E5PMP(1).jpg","type":"file"},{"name":"MVB}LG2T$%0U)V}BY@E5PMP.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/MVB}LG2T$%0U)V}BY@E5PMP.jpg","type":"file"},{"name":"UMCYVX~Z8}OV5M913Q(5PTE_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/UMCYVX~Z8}OV5M913Q(5PTE_tmb(1).jpg","type":"file"},{"name":"UMCYVX~Z8}OV5M913Q(5PTE_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/b卷/高数B下期末/UMCYVX~Z8}OV5M913Q(5PTE_tmb.jpg","type":"file"}]}]},{"name":"城南学院","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院","type":"folder","children":[{"name":"其他","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他","type":"folder","children":[{"name":"(8ATPS`N0PG9I_33{J660XS(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/(8ATPS`N0PG9I_33{J660XS(1).jpg","type":"file"},{"name":"(8ATPS`N0PG9I_33{J660XS.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/(8ATPS`N0PG9I_33{J660XS.jpg","type":"file"},{"name":"LOLJ{GTD%3Q7O$~Z11OJ[ZK(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/LOLJ{GTD%3Q7O$~Z11OJ[ZK(1).jpg","type":"file"},{"name":"LOLJ{GTD%3Q7O$~Z11OJ[ZK.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/LOLJ{GTD%3Q7O$~Z11OJ[ZK.jpg","type":"file"},{"name":"T]INQ7BQ~~GAZLG9PIX}FJC(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/T]INQ7BQ~~GAZLG9PIX}FJC(1).jpg","type":"file"},{"name":"T]INQ7BQ~~GAZLG9PIX}FJC.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/T]INQ7BQ~~GAZLG9PIX}FJC.jpg","type":"file"},{"name":"WPO}YCS405K]FD`7S]6B9PF(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/WPO}YCS405K]FD`7S]6B9PF(1).jpg","type":"file"},{"name":"WPO}YCS405K]FD`7S]6B9PF.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/WPO}YCS405K]FD`7S]6B9PF.jpg","type":"file"},{"name":"{{52[`)FU13NK8KYF~BS}LN(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/{{52[`)FU13NK8KYF~BS}LN(1).jpg","type":"file"},{"name":"{{52[`)FU13NK8KYF~BS}LN.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/其他/{{52[`)FU13NK8KYF~BS}LN.jpg","type":"file"}]},{"name":"第一套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第一套","type":"folder","children":[{"name":"1%0(S7BTE46%1]IP1%WE_XW_tmb(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第一套/1%0(S7BTE46%1]IP1%WE_XW_tmb(1).jpg","type":"file"},{"name":"1%0(S7BTE46%1]IP1%WE_XW_tmb.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第一套/1%0(S7BTE46%1]IP1%WE_XW_tmb.jpg","type":"file"},{"name":"F90}71Q`NUN3@JC$O6I`QFM(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第一套/F90}71Q`NUN3@JC$O6I`QFM(1).jpg","type":"file"},{"name":"F90}71Q`NUN3@JC$O6I`QFM.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第一套/F90}71Q`NUN3@JC$O6I`QFM.jpg","type":"file"}]},{"name":"第二套","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第二套","type":"folder","children":[{"name":"97FA13O{V}5]}X8D2A3CNFY(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第二套/97FA13O{V}5]}X8D2A3CNFY(1).jpg","type":"file"},{"name":"97FA13O{V}5]}X8D2A3CNFY.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第二套/97FA13O{V}5]}X8D2A3CNFY.jpg","type":"file"},{"name":"R0X~TMFMWCV$4Z(H@_GLEQM(1).jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第二套/R0X~TMFMWCV$4Z(H@_GLEQM(1).jpg","type":"file"},{"name":"R0X~TMFMWCV$4Z(H@_GLEQM.jpg","path":"高数/学校高数卷子下册/学校高数卷子/高等数学下/高等数学下/期末/城南学院/第二套/R0X~TMFMWCV$4Z(H@_GLEQM.jpg","type":"file"}]}]}]}]}]}]}]},{"name":"微积分综合练习题及参考答案.doc","path":"高数/微积分综合练习题及参考答案.doc","type":"file"},{"name":"长理近年高数上期末考题(1)(1)(1).pdf","path":"高数/长理近年高数上期末考题(1)(1)(1).pdf","type":"file"},{"name":"高数A","path":"高数/高数A","type":"folder","children":[{"name":"高数A上期末","path":"高数/高数A/高数A上期末","type":"folder","children":[{"name":"2022","path":"高数/高数A/高数A上期末/2022","type":"folder","children":[{"name":"本部高等数学A（一）期末考试试卷一.pdf","path":"高数/高数A/高数A上期末/2022/本部高等数学A（一）期末考试试卷一.pdf","type":"file"},{"name":"本部高等数学A（一）期末考试试卷三详细解答.pdf","path":"高数/高数A/高数A上期末/2022/本部高等数学A（一）期末考试试卷三详细解答.pdf","type":"file"},{"name":"本部高等数学A（一）期末考试试卷二详细解答.pdf","path":"高数/高数A/高数A上期末/2022/本部高等数学A（一）期末考试试卷二详细解答.pdf","type":"file"}]},{"name":"2023","path":"高数/高数A/高数A上期末/2023","type":"folder","children":[{"name":"2023-2024学年第一学期本部高等数学A（一）期末考试试卷答案（考试日期20240114） (1).pdf","path":"高数/高数A/高数A上期末/2023/2023-2024学年第一学期本部高等数学A（一）期末考试试卷答案（考试日期20240114） (1).pdf","type":"file"}]},{"name":"2024","path":"高数/高数A/高数A上期末/2024","type":"folder","children":[{"name":"5735E416F925319863B6D7BE24B67E6B.jpg","path":"高数/高数A/高数A上期末/2024/5735E416F925319863B6D7BE24B67E6B.jpg","type":"file"}]}]},{"name":"高数A下期末","path":"高数/高数A/高数A下期末","type":"folder","children":[{"name":"06FFC3E49547C04BD76FF076A79C2EBE.jpg","path":"高数/高数A/高数A下期末/06FFC3E49547C04BD76FF076A79C2EBE.jpg","type":"file"},{"name":"0E9A6AE4D96630169C714915C9F3A2F3.jpg","path":"高数/高数A/高数A下期末/0E9A6AE4D96630169C714915C9F3A2F3.jpg","type":"file"},{"name":"1_2023-2024本部高等数学A（二）期末考试试卷参考答案（20240708）.pdf","path":"高数/高数A/高数A下期末/1_2023-2024本部高等数学A（二）期末考试试卷参考答案（20240708）.pdf","type":"file"},{"name":"1_本部高等数学A（二）期末考试试卷A.pdf","path":"高数/高数A/高数A下期末/1_本部高等数学A（二）期末考试试卷A.pdf","type":"file"},{"name":"1_本部高等数学A（二）期末考试试卷A参考答案.pdf","path":"高数/高数A/高数A下期末/1_本部高等数学A（二）期末考试试卷A参考答案.pdf","type":"file"},{"name":"1_本部高等数学A（二）期末考试试卷B.pdf","path":"高数/高数A/高数A下期末/1_本部高等数学A（二）期末考试试卷B.pdf","type":"file"},{"name":"1_本部高等数学A（二）期末考试试卷B参考答案（修改）.pdf","path":"高数/高数A/高数A下期末/1_本部高等数学A（二）期末考试试卷B参考答案（修改）.pdf","type":"file"},{"name":"1_本部高等数学A（二）期末考试试卷C.pdf","path":"高数/高数A/高数A下期末/1_本部高等数学A（二）期末考试试卷C.pdf","type":"file"},{"name":"26790420131E8343EB8B17BF5925BF92.jpg","path":"高数/高数A/高数A下期末/26790420131E8343EB8B17BF5925BF92.jpg","type":"file"},{"name":"26F026630F265D525BD2A40E39EDF6EC.jpg","path":"高数/高数A/高数A下期末/26F026630F265D525BD2A40E39EDF6EC.jpg","type":"file"},{"name":"2_高数往届期中试卷.pdf","path":"高数/高数A/高数A下期末/2_高数往届期中试卷.pdf","type":"file"},{"name":"4F1A876413520ECA0FD9713924CB9688.jpg","path":"高数/高数A/高数A下期末/4F1A876413520ECA0FD9713924CB9688.jpg","type":"file"},{"name":"530CE6C389C927871A8E3AEC3EB0B6A6.jpg","path":"高数/高数A/高数A下期末/530CE6C389C927871A8E3AEC3EB0B6A6.jpg","type":"file"},{"name":"66FBA28FED19E0E814019AC2D833AB0F.jpg","path":"高数/高数A/高数A下期末/66FBA28FED19E0E814019AC2D833AB0F.jpg","type":"file"},{"name":"678772B41CBA8C655462BAD64822DDB3.jpg","path":"高数/高数A/高数A下期末/678772B41CBA8C655462BAD64822DDB3.jpg","type":"file"},{"name":"68221B5EB8147B4C7B77463CE4395F3E.jpg","path":"高数/高数A/高数A下期末/68221B5EB8147B4C7B77463CE4395F3E.jpg","type":"file"},{"name":"69559870A65DF1EF9165806CC41843AC.jpg","path":"高数/高数A/高数A下期末/69559870A65DF1EF9165806CC41843AC.jpg","type":"file"},{"name":"6B370517813094D519783BD4A8787F26.jpg","path":"高数/高数A/高数A下期末/6B370517813094D519783BD4A8787F26.jpg","type":"file"},{"name":"70E3CCB0D89A9F2B242C5044A1198A56.jpg","path":"高数/高数A/高数A下期末/70E3CCB0D89A9F2B242C5044A1198A56.jpg","type":"file"},{"name":"9745F932ADE2576B9F8234660DE26F46.jpg","path":"高数/高数A/高数A下期末/9745F932ADE2576B9F8234660DE26F46.jpg","type":"file"},{"name":"98E3918CA09332E0145E5BC9AD3FF81F.jpg","path":"高数/高数A/高数A下期末/98E3918CA09332E0145E5BC9AD3FF81F.jpg","type":"file"},{"name":"B4894EBC485CBA04F4F5FF280BB0C573.jpg","path":"高数/高数A/高数A下期末/B4894EBC485CBA04F4F5FF280BB0C573.jpg","type":"file"},{"name":"BF30AE6BDC23CFB7B8E6B9369124C5C7.jpg","path":"高数/高数A/高数A下期末/BF30AE6BDC23CFB7B8E6B9369124C5C7.jpg","type":"file"},{"name":"F1EF6B356ADEB6A62EB9151ADFFC1473.jpg","path":"高数/高数A/高数A下期末/F1EF6B356ADEB6A62EB9151ADFFC1473.jpg","type":"file"},{"name":"F6812A39726A5F933DA1C0E15596B921.jpg","path":"高数/高数A/高数A下期末/F6812A39726A5F933DA1C0E15596B921.jpg","type":"file"},{"name":"本部高等数学A（二）期中考试试卷一参考答案.pdf","path":"高数/高数A/高数A下期末/本部高等数学A（二）期中考试试卷一参考答案.pdf","type":"file"},{"name":"长理高数期末试卷.pdf","path":"高数/高数A/高数A下期末/长理高数期末试卷.pdf","type":"file"},{"name":"高数试卷参考答案.pdf","path":"高数/高数A/高数A下期末/高数试卷参考答案.pdf","type":"file"}]}]},{"name":"高数B","path":"高数/高数B","type":"folder","children":[{"name":"高数B.zip","path":"高数/高数B/高数B.zip","type":"file"},{"name":"高数B（二）试卷十一.pdf","path":"高数/高数B/高数B（二）试卷十一.pdf","type":"file"},{"name":"高数B（二）试卷十一答案.pdf","path":"高数/高数B/高数B（二）试卷十一答案.pdf","type":"file"},{"name":"高数B（二）试卷十七.pdf","path":"高数/高数B/高数B（二）试卷十七.pdf","type":"file"},{"name":"高数B（二）试卷十七答案.pdf","path":"高数/高数B/高数B（二）试卷十七答案.pdf","type":"file"},{"name":"高数B（二）试卷十三.pdf","path":"高数/高数B/高数B（二）试卷十三.pdf","type":"file"},{"name":"高数B（二）试卷十三答案.pdf","path":"高数/高数B/高数B（二）试卷十三答案.pdf","type":"file"},{"name":"高数B（二）试卷十九.pdf","path":"高数/高数B/高数B（二）试卷十九.pdf","type":"file"},{"name":"高数B（二）试卷十九答案.pdf","path":"高数/高数B/高数B（二）试卷十九答案.pdf","type":"file"},{"name":"高数B（二）试卷十二.pdf","path":"高数/高数B/高数B（二）试卷十二.pdf","type":"file"},{"name":"高数B（二）试卷十二答案.pdf","path":"高数/高数B/高数B（二）试卷十二答案.pdf","type":"file"},{"name":"高数B（二）试卷十五.pdf","path":"高数/高数B/高数B（二）试卷十五.pdf","type":"file"},{"name":"高数B（二）试卷十五答案.pdf","path":"高数/高数B/高数B（二）试卷十五答案.pdf","type":"file"},{"name":"高数B（二）试卷十六.pdf","path":"高数/高数B/高数B（二）试卷十六.pdf","type":"file"},{"name":"高数B（二）试卷十六答案.pdf","path":"高数/高数B/高数B（二）试卷十六答案.pdf","type":"file"},{"name":"高数B（二）试卷十四.pdf","path":"高数/高数B/高数B（二）试卷十四.pdf","type":"file"},{"name":"高数B（二）试卷十四答案.pdf","path":"高数/高数B/高数B（二）试卷十四答案.pdf","type":"file"}]}]},{"name":"高等代数","path":"高等代数","type":"folder","children":[{"name":"1.pdf","path":"高等代数/1.pdf","type":"file"},{"name":"1答案.pdf","path":"高等代数/1答案.pdf","type":"file"},{"name":"2.pdf","path":"高等代数/2.pdf","type":"file"},{"name":"2（答案）.pdf","path":"高等代数/2（答案）.pdf","type":"file"},{"name":"3.pdf","path":"高等代数/3.pdf","type":"file"},{"name":"3答案.pdf","path":"高等代数/3答案.pdf","type":"file"}]}];
+    class App {
+      constructor() {
+        this.currentPath = '';
+        this.searchQuery = '';
+        this.flatList = [];
+        this.init();
+      }
+      init() {
+        this.buildFlatList(FILE_TREE, '');
+        window.addEventListener('scroll', () => {
+          document.getElementById('scrollTopBtn').style.display = window.scrollY > 300 ? 'flex' : 'none';
+        });
+        this.render();
+      }
+      buildFlatList(items, parentPath) {
+        for (const item of items) {
+          this.flatList.push({ ...item, parentPath });
+          if (item.children) this.buildFlatList(item.children, item.path);
+        }
+      }
+      goHome() { this.currentPath = ''; this.searchQuery = ''; document.getElementById('searchInput').value = ''; this.render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+      navigateTo(path) { this.currentPath = path; this.render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+      handleSearch(query) { this.searchQuery = query.trim().toLowerCase(); this.render(); }
+      getFileIcon(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        switch(ext) {
+          case 'pdf': return {icon:'picture_as_pdf',class:'pdf'};
+          case 'doc': case 'docx': return {icon:'description',class:'doc'};
+          case 'ppt': case 'pptx': return {icon:'slideshow',class:'ppt'};
+          case 'jpg': case 'jpeg': case 'png': case 'gif': case 'webp': case 'bmp': return {icon:'image',class:'img'};
+          case 'zip': case 'rar': case '7z': return {icon:'folder_zip',class:'zip'};
+          case 'txt': case 'md': return {icon:'article',class:'txt'};
+          case 'xls': case 'xlsx': return {icon:'table_chart',class:'doc'};
+          case 'html': case 'htm': return {icon:'code',class:'txt'};
+          default: return {icon:'insert_drive_file',class:'default'};
+        }
+      }
+      getFileCount(item) {
+        if (item.type === 'file') return 0;
+        let c = 0;
+        for (const ch of (item.children || [])) {
+          if (ch.type === 'file') c++;
+          else c += this.getFileCount(ch);
+        }
+        return c;
+      }
+      getFolderCount(item) {
+        if (item.type === 'file') return 0;
+        let c = 0;
+        for (const ch of (item.children || [])) {
+          if (ch.type === 'folder') { c++; c += this.getFolderCount(ch); }
+        }
+        return c;
+      }
+      renderBreadcrumbs(path) {
+        if (!path) return '';
+        const parts = path.split('/');
+        let html = '<nav class="breadcrumbs"><div class="breadcrumb-item"><a onclick="app.goHome()">首页</a></div><span style="color:var(--md-sys-color-outline-variant);">›</span>';
+        let bp = '';
+        for (let i = 0; i < parts.length; i++) {
+          bp = bp ? bp + '/' + parts[i] : parts[i];
+          if (i < parts.length - 1) {
+            html += '<div class="breadcrumb-item"><a onclick="app.navigateTo(\'' + bp + '\')">' + parts[i] + '</a></div><span style="color:var(--md-sys-color-outline-variant);">›</span>';
+          } else {
+            html += '<div class="breadcrumb-item current">' + parts[i] + '</div>';
+          }
+        }
+        html += '</nav>';
+        return html;
+      }
+      renderCard(item) {
+        if (item.type === 'folder') {
+          const fc = this.getFileCount(item);
+          const fdc = this.getFolderCount(item);
+          return '<div class="md-card fade-in" onclick="app.navigateTo(\'' + item.path + '\')"><div class="card-header"><div class="card-icon folder"><span class="material-icons-round">folder</span></div><div class="card-content"><div class="card-title">' + item.name + '</div><div class="card-subtitle">' + (fc > 0 ? fc + ' 个文件' : '') + (fdc > 0 ? (fc > 0 ? ' · ' : '') + fdc + ' 个子文件夹' : '') + '</div></div></div></div>';
+        } else {
+          const ic = this.getFileIcon(item.name);
+          return '<a href="' + item.path + '" class="md-card fade-in" target="_blank"><div class="card-header"><div class="card-icon ' + ic.class + '"><span class="material-icons-round">' + ic.icon + '</span></div><div class="card-content"><div class="card-title">' + item.name + '</div><div class="card-subtitle">' + item.path + '</div></div></div></a>';
+        }
+      }
+      renderListItem(item) {
+        if (item.type === 'folder') {
+          const fc = this.getFileCount(item);
+          const fdc = this.getFolderCount(item);
+          return '<div class="list-item fade-in" onclick="app.navigateTo(\'' + item.path + '\')"><div class="list-item-icon folder"><span class="material-icons-round">folder</span></div><div class="list-item-content"><div class="list-item-title">' + item.name + '</div><div class="list-item-subtitle">' + (fc > 0 ? fc + ' 个文件' : '') + (fdc > 0 ? (fc > 0 ? ' · ' : '') + fdc + ' 个子文件夹' : '') + '</div></div><span class="material-icons-round" style="color:var(--md-sys-color-outline);">chevron_right</span></div>';
+        } else {
+          const ic = this.getFileIcon(item.name);
+          return '<a href="' + item.path + '" class="list-item fade-in" target="_blank"><div class="list-item-icon ' + ic.class + '"><span class="material-icons-round">' + ic.icon + '</span></div><div class="list-item-content"><div class="list-item-title">' + item.name + '</div><div class="list-item-subtitle">' + item.path + '</div></div><span class="material-icons-round" style="color:var(--md-sys-color-outline);">open_in_new</span></a>';
+        }
+      }
+      renderSearchResults() {
+        const results = this.flatList.filter(i => i.name.toLowerCase().includes(this.searchQuery));
+        if (results.length === 0) return '<div class="empty-state"><span class="material-icons-round">search_off</span><h3>未找到结果</h3><p>尝试使用其他关键词搜索</p></div>';
+        const folders = results.filter(r => r.type === 'folder');
+        const files = results.filter(r => r.type === 'file');
+        let html = '<div class="section-title">搜索结果: ' + results.length + ' 个匹配</div>';
+        if (folders.length > 0) {
+          html += '<h3 style="font-size:0.875rem;font-weight:500;color:var(--md-sys-color-on-surface-variant);margin:16px 0 8px;">文件夹</h3><div class="card-grid">';
+          for (const i of folders) html += this.renderCard(i);
+          html += '</div>';
+        }
+        if (files.length > 0) {
+          html += '<h3 style="font-size:0.875rem;font-weight:500;color:var(--md-sys-color-on-surface-variant);margin:24px 0 8px;">文件</h3><div class="file-list-container"><div class="file-list">';
+          for (const i of files) html += this.renderListItem(i);
+          html += '</div></div>';
+        }
+        return html;
+      }
+      renderFolderView(items, path) {
+        const folders = items.filter(i => i.type === 'folder');
+        const files = items.filter(i => i.type === 'file');
+        let html = this.renderBreadcrumbs(path);
+        if (folders.length === 0 && files.length === 0) {
+          html += '<div class="empty-state"><span class="material-icons-round">folder_open</span><h3>空文件夹</h3><p>此文件夹中没有内容</p></div>';
+          return html;
+        }
+        if (folders.length > 0) {
+          html += '<div class="section-title">文件夹 (' + folders.length + ')</div><div class="card-grid">';
+          for (const i of folders) html += this.renderCard(i);
+          html += '</div>';
+        }
+        if (files.length > 0) {
+          html += '<div class="section-title" style="margin-top:32px;">文件 (' + files.length + ')</div><div class="file-list-container"><div class="file-list">';
+          for (const i of files) html += this.renderListItem(i);
+          html += '</div></div>';
+        }
+        return html;
+      }
+      renderHome() {
+        const items = FILE_TREE;
+        const folders = items.filter(i => i.type === 'folder');
+        const files = items.filter(i => i.type === 'file');
+        let html = '<div class="section-title">所有学科</div><div class="card-grid">';
+        for (const i of folders) html += this.renderCard(i);
+        html += '</div>';
+        if (files.length > 0) {
+          html += '<div class="section-title" style="margin-top:32px;">根目录文件</div><div class="file-list-container"><div class="file-list">';
+          for (const i of files) html += this.renderListItem(i);
+          html += '</div></div>';
+        }
+        return html;
+      }
+      findItemsByPath(path) {
+        if (!path) return FILE_TREE;
+        const parts = path.split('/');
+        let current = FILE_TREE;
+        for (const part of parts) {
+          const found = current.find(i => i.name === part && i.type === 'folder');
+          if (!found) return [];
+          current = found.children || [];
+        }
+        return current;
+      }
+      render() {
+        const container = document.getElementById('mainContent');
+        if (this.searchQuery) { container.innerHTML = this.renderSearchResults(); return; }
+        if (!this.currentPath) { container.innerHTML = this.renderHome(); return; }
+        const items = this.findItemsByPath(this.currentPath);
+        container.innerHTML = this.renderFolderView(items, this.currentPath);
+      }
+    }
+    const app = new App();
+  </script>
+</body>
+</html>
